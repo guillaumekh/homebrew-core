@@ -1,34 +1,37 @@
 class Vte3 < Formula
   desc "Terminal emulator widget used by GNOME terminal"
   homepage "https://developer.gnome.org/vte/"
-  url "https://download.gnome.org/sources/vte/0.52/vte-0.52.0.tar.xz"
-  sha256 "d5ae72dddd57af493afa10ca2a290f284e588021b0bd8aaaa63dbb75de7c0567"
+  url "https://download.gnome.org/sources/vte/0.56/vte-0.56.3.tar.xz"
+  sha256 "17a1d4bc8848f1d2acfa4c20aaa24b9bac49f057b8909c56d3dafec2e2332648"
   revision 1
 
   bottle do
-    sha256 "8a2679460619e2b283ea9fb89608058db95c054d6a330b29ff6c39a6f65f99f7" => :high_sierra
-    sha256 "3f36d30cb93aeba0f08f75c3743a94fe2e364a845c683edc9b49d74c70171b09" => :sierra
-    sha256 "1e6247b55765c6028b1b12c30813e18b97111bcbb510eece1a5f6ef92c3ff44f" => :el_capitan
+    rebuild 1
+    sha256 "bf5a39f6cd2016c5ee2fe17daf110d874bf99c739e6f467a1a352420d54ddfa2" => :mojave
+    sha256 "60a3dc28399e956b427e1f5bf2ab141d04ed5fe28a9224efe03d51e6d0f78b3f" => :high_sierra
+    sha256 "294cdcc36012ac9246973fe5bdfbd94ed27907c943f906712cea6325e59a74d4" => :sierra
   end
 
   depends_on "gobject-introspection" => :build
-  depends_on "pkg-config" => :build
+  depends_on "gtk-doc" => :build
   depends_on "intltool" => :build
+  depends_on "pkg-config" => :build
   depends_on "gettext"
-  depends_on "gtk+3"
   depends_on "gnutls"
-  depends_on "vala"
+  depends_on "gtk+3"
   depends_on "pcre2"
+  depends_on "vala"
 
   def install
+    ENV["XML_CATALOG_FILES"] = "#{etc}/xml/catalog"
+
     args = [
       "--disable-dependency-tracking",
       "--prefix=#{prefix}",
       "--disable-Bsymbolic",
       "--enable-introspection=yes",
-      "--enable-gnome-pty-helper",
+      "--enable-gtk-doc",
     ]
-
     system "./configure", *args
     system "make", "install"
   end
@@ -51,6 +54,7 @@ class Vte3 < Formula
     glib = Formula["glib"]
     gnutls = Formula["gnutls"]
     gtkx3 = Formula["gtk+3"]
+    harfbuzz = Formula["harfbuzz"]
     libepoxy = Formula["libepoxy"]
     libpng = Formula["libpng"]
     libtasn1 = Formula["libtasn1"]
@@ -69,6 +73,7 @@ class Vte3 < Formula
       -I#{glib.opt_lib}/glib-2.0/include
       -I#{gnutls.opt_include}
       -I#{gtkx3.opt_include}/gtk-3.0
+      -I#{harfbuzz.opt_include}/harfbuzz
       -I#{include}/vte-2.91
       -I#{libepoxy.opt_include}
       -I#{libpng.opt_include}/libpng16

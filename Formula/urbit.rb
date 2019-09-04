@@ -1,31 +1,31 @@
 class Urbit < Formula
   desc "Personal cloud computer"
   homepage "https://urbit.org"
-  url "https://github.com/urbit/urbit/archive/v0.4.5.tar.gz"
-  sha256 "ac013b5a02d250450c983a3efc0997f2a5f5675bc3e16b51ed0a54dff1caef7c"
+  # pull from git tag to get submodules
+  url "https://github.com/urbit/urbit.git",
+      :tag      => "v0.7.4",
+      :revision => "e8416596fb7c47e343b49ea5ec12c2a095873c2f"
 
   bottle do
-    cellar :any
-    sha256 "3ea8320910d59da1d22253cda85376570636e0c65f4d78b0ad7b79f1e9400923" => :high_sierra
-    sha256 "6aa8484fbfaa20cd2b2b53b8de1cea7b342fe2a34185a91a680d6d544ac93d1f" => :sierra
-    sha256 "fa9109dff4cde264e6581f81e9bd30574081fd94ebff4436888d77460db4b8ad" => :el_capitan
-    sha256 "5544b9553137481df6e2035a4e0a0b022f362fab12f2b3047cc206a93f79cc5c" => :yosemite
+    sha256 "1cbb718456918a091972483794905eb36e6454ec695738420e1aea65ed294da9" => :mojave
+    sha256 "c40b7ee58aca46f70991a0dff2e3713896c5a618ff91f005915151fd43ad80fc" => :high_sierra
+    sha256 "8a8ca40b3158ab02edbbea34893a3e482ad8e2435b2ba20a92ea346ff70a0640" => :sierra
   end
 
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
+  depends_on "pkg-config" => :build
   depends_on "gmp"
   depends_on "libsigsegv"
+  depends_on "libuv"
   depends_on "openssl"
 
-  depends_on "libtool" => :build
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "cmake" => :build
-
   def install
-    system "make", "BIN=#{bin}", "LIB=#{share}"
+    system "./scripts/build"
+    bin.install "build/urbit"
   end
 
   test do
-    assert_match "simple usage:", shell_output("#{bin}/urbit 2>&1", 1)
+    assert_match "Development Usage:", shell_output("#{bin}/urbit 2>&1", 1)
   end
 end

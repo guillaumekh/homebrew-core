@@ -1,26 +1,18 @@
 class Boost < Formula
   desc "Collection of portable C++ source libraries"
   homepage "https://www.boost.org/"
-  url "https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.bz2"
-  sha256 "5721818253e6a0989583192f96782c4a98eb6204965316df9f5ad75819225ca9"
+  url "https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.bz2"
+  sha256 "430ae8354789de4fd19ee52f3b1f739e1fba576f0aded0897c3c2bc00fb38778"
   head "https://github.com/boostorg/boost.git"
 
   bottle do
     cellar :any
-    sha256 "78cb090c515e20aa7307c6619a055ffd8858cc6a3bd756958edbf34f463e4bc1" => :high_sierra
-    sha256 "51e3b67625b8def53f5e5183a5ef98071e17b0b760dfc6baa65877d4528141ca" => :sierra
-    sha256 "6352d4f65d7595c1eff62c6ce07588944122fa3305a77813fdbc16747b7dddce" => :el_capitan
+    sha256 "c626b90770424ca969d0870d25d7fb13cf9d4f23a828407701face0e7ec4ac93" => :mojave
+    sha256 "8d5a7c95155faf57ce246d3455cea3628569d684a14fb9e621893ceaf3d65373" => :high_sierra
+    sha256 "0578344e152f306a4594b72493dcc3f638425b0fb7f4fcd23e5a523c4542b33a" => :sierra
   end
 
-  option "with-icu4c", "Build regexp engine with icu support"
-  option "without-single", "Disable building single-threading variant"
-  option "without-static", "Disable building static library variant"
-
-  deprecated_option "with-icu" => "with-icu4c"
-
-  depends_on "icu4c" => :optional
-
-  needs :cxx11
+  depends_on "icu4c"
 
   def install
     # Force boost to compile with the desired compiler
@@ -29,14 +21,12 @@ class Boost < Formula
     end
 
     # libdir should be set by --prefix but isn't
-    bootstrap_args = ["--prefix=#{prefix}", "--libdir=#{lib}"]
-
-    if build.with? "icu4c"
-      icu4c_prefix = Formula["icu4c"].opt_prefix
-      bootstrap_args << "--with-icu=#{icu4c_prefix}"
-    else
-      bootstrap_args << "--without-icu"
-    end
+    icu4c_prefix = Formula["icu4c"].opt_prefix
+    bootstrap_args = %W[
+      --prefix=#{prefix}
+      --libdir=#{lib}
+      --with-icu=#{icu4c_prefix}
+    ]
 
     # Handle libraries that will not be built.
     without_libraries = ["python", "mpi"]
@@ -48,30 +38,26 @@ class Boost < Formula
     bootstrap_args << "--without-libraries=#{without_libraries.join(",")}"
 
     # layout should be synchronized with boost-python and boost-mpi
-    args = ["--prefix=#{prefix}",
-            "--libdir=#{lib}",
-            "-d2",
-            "-j#{ENV.make_jobs}",
-            "--layout=tagged",
-            "--user-config=user-config.jam",
-            "-sNO_LZMA=1",
-            "install"]
+    #
+    # --no-cmake-config should be dropped if possible in next version
+    args = %W[
+      --prefix=#{prefix}
+      --libdir=#{lib}
+      -d2
+      -j#{ENV.make_jobs}
+      --layout=tagged-1.66
+      --user-config=user-config.jam
+      --no-cmake-config
+      -sNO_LZMA=1
+      -sNO_ZSTD=1
+      install
+      threading=multi,single
+      link=shared,static
+    ]
 
-    if build.with? "single"
-      args << "threading=multi,single"
-    else
-      args << "threading=multi"
-    end
-
-    if build.with? "static"
-      args << "link=shared,static"
-    else
-      args << "link=shared"
-    end
-
-    # Trunk starts using "clang++ -x c" to select C compiler which breaks C++11
-    # handling using ENV.cxx11. Using "cxxflags" and "linkflags" still works.
-    args << "cxxflags=-std=c++11"
+    # Boost is using "clang++ -x c" to select C compiler which breaks C++14
+    # handling using ENV.cxx14. Using "cxxflags" and "linkflags" still works.
+    args << "cxxflags=-std=c++14"
     if ENV.compiler == :clang
       args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++"
     end
@@ -114,7 +100,7 @@ class Boost < Formula
         return 0;
       }
     EOS
-    system ENV.cxx, "test.cpp", "-std=c++1y", "-L#{lib}", "-lboost_system", "-o", "test"
+    system ENV.cxx, "test.cpp", "-std=c++14", "-stdlib=libc++", "-o", "test"
     system "./test"
   end
 end

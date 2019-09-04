@@ -1,25 +1,21 @@
 class Libuv < Formula
   desc "Multi-platform support library with a focus on asynchronous I/O"
   homepage "https://github.com/libuv/libuv"
-  url "https://github.com/libuv/libuv/archive/v1.19.2.tar.gz"
-  sha256 "ccc5f3b43ed171640513786e5e809508cb6308279b4d71a016e4550ad62f1686"
+  url "https://github.com/libuv/libuv/archive/v1.31.0.tar.gz"
+  sha256 "ab041ea5d1965a33d4e03ea87718b8922ba4e54abb46c71cf9e040edef2556c0"
   head "https://github.com/libuv/libuv.git", :branch => "v1.x"
 
   bottle do
     cellar :any
-    sha256 "6c16910d6afdc5ee10afe47ec13a99358de48002bf0892a254c8ee981a0b8f85" => :high_sierra
-    sha256 "5813fbf134bf565002720a4a6a206525e397a4e541a0fd63049957d692981620" => :sierra
-    sha256 "f6761c76ade3060f57b8adc1c18d48250eecb32db3ff5b6a1f813b62e7595e81" => :el_capitan
+    sha256 "d99c68a335354839700616c87cdfea6635025965be5728a974ec866838d403ae" => :mojave
+    sha256 "d0afcf32eac5aeb43fbc8711a590127d1cb54343f85ade53c7bb0083608041f4" => :high_sierra
+    sha256 "e86931a805793e222336c213a45c2fd0633123271ebaa3b69995053fe4803d15" => :sierra
   end
 
-  option "with-test", "Execute compile time checks (Requires Internet connection)"
-
-  deprecated_option "with-check" => "with-test"
-
-  depends_on "pkg-config" => :build
-  depends_on "automake" => :build
   depends_on "autoconf" => :build
+  depends_on "automake" => :build
   depends_on "libtool" => :build
+  depends_on "pkg-config" => :build
   depends_on "sphinx-doc" => :build
 
   def install
@@ -36,7 +32,6 @@ class Libuv < Formula
                           "--disable-silent-rules",
                           "--prefix=#{prefix}"
     system "make"
-    system "make", "check" if build.with? "test"
     system "make", "install"
   end
 

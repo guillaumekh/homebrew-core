@@ -1,27 +1,28 @@
 class Libspectrum < Formula
   desc "Support library for ZX Spectrum emulator"
   homepage "https://fuse-emulator.sourceforge.io/libspectrum.php"
-  url "https://downloads.sourceforge.net/project/fuse-emulator/libspectrum/1.4.1/libspectrum-1.4.1.tar.gz"
-  sha256 "025a1663491cc58174e91df77d82b28782310f6831485cb14291ce774f23c729"
+  url "https://downloads.sourceforge.net/project/fuse-emulator/libspectrum/1.4.4/libspectrum-1.4.4.tar.gz"
+  sha256 "fdfb2b2bad17bcfc98c098deaebf2a9811824b08d525172436d5eb134c9780b1"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "345eb34fea01e4c8c56ebd6cf9760212f2824128994d36ed54101ae1a7ea8ede" => :high_sierra
-    sha256 "3a73d20585d1bcfd63cd22cf875ffd5d7ef00f7edf72117beefaca8886be8da4" => :sierra
-    sha256 "ae0fef62ab3cbfc4f53a69203c517b217016c2bfd76edfeea66cdbbcf7915c8c" => :el_capitan
+    sha256 "c4e70d37db34db4b4ab5ced6cb72e7860a2b362f107628a4c5a157428028a0b6" => :mojave
+    sha256 "42b63148fa851319db8dc6fe70c7895c84a64c6071f05a0791f87b08ce1c55a1" => :high_sierra
+    sha256 "185c851d42b802b2b021ef00afac4e1f07a6ab6bd29d3b5ca4c7bef65f4b8cc9" => :sierra
   end
 
   head do
     url "https://svn.code.sf.net/p/fuse-emulator/code/trunk/libspectrum"
-    depends_on "automake" => :build
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
     depends_on "libtool" => :build
   end
 
   depends_on "pkg-config" => :build
-  depends_on "libgcrypt" => :recommended
-  depends_on "glib" => :recommended
-  depends_on "audiofile" => :recommended
+  depends_on "audiofile"
+  depends_on "glib"
+  depends_on "libgcrypt"
 
   def install
     system "./autogen.sh" if build.head?

@@ -1,71 +1,70 @@
 class Icecream < Formula
   desc "Distributed compiler with a central scheduler to share build load"
   homepage "https://en.opensuse.org/Icecream"
-  url "https://github.com/icecc/icecream/archive/1.1.tar.gz"
-  sha256 "92532791221d7ec041b7c5cf9998d9c3ee8f57cbd2da1819c203a4c6799ffc18"
+  url "https://github.com/icecc/icecream/archive/1.2.tar.gz"
+  sha256 "12d4132e5aacf6907877b691a8ac09e3e2f704ca016c49bc5eb566fc9185f544"
+  revision 1
 
   bottle do
-    sha256 "ac7f6745981bd1c0853af12c4a460cd196a95b7c27c6072746db62086e6afcf0" => :high_sierra
-    sha256 "ff931dd74efc02cad494df41e2df0919fd1a65b2908ade15566b5a6f0974e3ee" => :sierra
-    sha256 "744922ad03cb2468d1b3251238f7130fb1e4295388370bf47d6edeb43a8c36b2" => :el_capitan
-    sha256 "0adc60662ea9ede33caf1fffb35a129593479a99c34bb36525c1c718b0a77639" => :yosemite
+    sha256 "2118015d81859d3149fcc2ca0cc46f3c33962196763926296adf13eb3e8f6872" => :mojave
+    sha256 "3bf33081248ecf62d9023e72e7a46601768fae1863a9c01cda22a5ca35612dd7" => :high_sierra
+    sha256 "b1a775dafdaf583d71357f389c6851c397e8e56cbbca41f3d426915d74c3a1be" => :sierra
   end
-
-  option "with-docbook2X", "Build with man page"
-  option "without-clang-wrappers", "Don't use symlink wrappers for clang/clang++"
-  option "with-clang-rewrite-includes", "Use by default Clang's -frewrite-includes option"
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
+  depends_on "docbook2x" => :build
   depends_on "libtool" => :build
   depends_on "lzo"
-  depends_on "docbook2x" => [:optional, :build]
+
+  # Backport https://github.com/icecc/icecream/pull/467
+  # Total memory was not correctly detected on macOS, resulting in a hard limit of 100MB
+  # being set. Remove in next stable release.
+  patch do
+    url "https://github.com/icecc/icecream/commit/1af3a23521cfd7dc1a067625f311ebc5d4f34a08.patch?full_index=1"
+    sha256 "a21b05bc18dfff8e29d0d0f6f7acdfc2fcfe3a7daaf7646340bc51cf28186445"
+  end
 
   def install
     args = %W[
       --disable-dependency-tracking
       --disable-silent-rules
       --prefix=#{prefix}
+      --enable-clang-wrappers
     ]
-    args << "--without-man" if build.without? "docbook2X"
-    args << "--enable-clang-wrappers" if build.with? "clang-wrappers"
-    args << "--enable-clang-write-includes" if build.with? "clang-rewrite-includes"
 
     system "./autogen.sh"
     system "./configure", *args
     system "make", "install"
 
-    (prefix/"org.opensuse.icecc.plist").write iceccd_plist
-    (prefix/"org.opensuse.icecc-scheduler.plist").write scheduler_plist
+    # Manually install scheduler property list
+    (prefix/"#{plist_name}-scheduler.plist").write scheduler_plist
   end
 
   def caveats; <<~EOS
     To override the toolset with icecc, add to your path:
       #{opt_libexec}/icecc/bin
-
-    To have launchd start the icecc daemon at login:
-      cp #{opt_prefix}/org.opensuse.icecc.plist ~/Library/LaunchAgents/
-      launchctl load -w ~/Library/LaunchAgents/org.opensuse.icecc.plist
-    EOS
+  EOS
   end
 
-  def iceccd_plist; <<~EOS
+  plist_options :manual => "iceccd"
+
+  def plist; <<~EOS
     <?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
     <plist version="1.0">
     <dict>
         <key>Label</key>
-        <string>Icecc Daemon</string>
+        <string>#{plist_name}</string>
         <key>ProgramArguments</key>
         <array>
         <string>#{sbin}/iceccd</string>
-        <string>-d</string>
         </array>
         <key>RunAtLoad</key>
         <true/>
     </dict>
     </plist>
-    EOS
+  EOS
   end
 
   def scheduler_plist; <<~EOS
@@ -74,17 +73,16 @@ class Icecream < Formula
     <plist version="1.0">
     <dict>
         <key>Label</key>
-        <string>Icecc Scheduler</string>
+        <string>#{plist_name}-scheduler</string>
         <key>ProgramArguments</key>
         <array>
         <string>#{sbin}/icecc-scheduler</string>
-        <string>-d</string>
         </array>
         <key>RunAtLoad</key>
         <true/>
     </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do
@@ -110,28 +108,26 @@ class Icecream < Formula
     system opt_libexec/"icecc/bin/g++", "-o", "hello-cc", "hello-cc.cc"
     assert_equal "Hello, world!\n", shell_output("./hello-cc")
 
-    if build.with? "clang-wrappers"
-      (testpath/"hello-clang.c").write <<~EOS
-        #include <stdio.h>
-        int main()
-        {
-          puts("Hello, world!");
-          return 0;
-        }
-      EOS
-      system opt_libexec/"icecc/bin/clang", "-o", "hello-clang", "hello-clang.c"
-      assert_equal "Hello, world!\n", shell_output("./hello-clang")
+    (testpath/"hello-clang.c").write <<~EOS
+      #include <stdio.h>
+      int main()
+      {
+        puts("Hello, world!");
+        return 0;
+      }
+    EOS
+    system opt_libexec/"icecc/bin/clang", "-o", "hello-clang", "hello-clang.c"
+    assert_equal "Hello, world!\n", shell_output("./hello-clang")
 
-      (testpath/"hello-cclang.cc").write <<~EOS
-        #include <iostream>
-        int main()
-        {
-          std::cout << "Hello, world!" << std::endl;
-          return 0;
-        }
-      EOS
-      system opt_libexec/"icecc/bin/clang++", "-o", "hello-cclang", "hello-cclang.cc"
-      assert_equal "Hello, world!\n", shell_output("./hello-cclang")
-    end
+    (testpath/"hello-cclang.cc").write <<~EOS
+      #include <iostream>
+      int main()
+      {
+        std::cout << "Hello, world!" << std::endl;
+        return 0;
+      }
+    EOS
+    system opt_libexec/"icecc/bin/clang++", "-o", "hello-cclang", "hello-cclang.cc"
+    assert_equal "Hello, world!\n", shell_output("./hello-cclang")
   end
 end

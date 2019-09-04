@@ -1,14 +1,14 @@
 class Abyss < Formula
   desc "Genome sequence assembler for short reads"
   homepage "http://www.bcgsc.ca/platform/bioinfo/software/abyss"
-  url "https://github.com/bcgsc/abyss/releases/download/2.0.3/abyss-2.0.3.tar.gz"
-  sha256 "ff4cb9c9f78e443cc5b613dbc1f949f3eba699e78f090e73f0fefe1b99d85d55"
+  url "https://github.com/bcgsc/abyss/releases/download/2.2.1/abyss-2.2.1.tar.gz"
+  sha256 "838c478b0fb5092e508f0253e213a820cd3faaa45546236f43b87a7194aa2cdf"
 
   bottle do
     cellar :any
-    sha256 "d7078a4a71b36a5feb6c47edbeae54192f90d3ffad6786089d053383777b1dba" => :high_sierra
-    sha256 "07ec65867c705ac31dde0198778c183239c07932d0767b03ee5351a3f61cb565" => :sierra
-    sha256 "a2f3c6156e8f9901e84e9885460923e44f49bdeb0ac895fd3d479119c327d71a" => :el_capitan
+    sha256 "c97c5da6397f990889bc108183aeba752d7dfa0d096ee1362ae5b66352ce08d6" => :mojave
+    sha256 "64db8abd2422f7c484a94e3912e9fc607027d47c3491fe533bf4d77a0f30ef3a" => :high_sierra
+    sha256 "fe96208a98f962f62ccd572846d817742eef39b20ee8432dd950587b5a919429" => :sierra
   end
 
   head do
@@ -33,10 +33,13 @@ class Abyss < Formula
 
   def install
     system "./autogen.sh" if build.head?
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
+    system "./configure", "--enable-maxk=128",
                           "--prefix=#{prefix}",
-                          "--enable-maxk=128"
+                          "--with-boost=#{Formula["boost"].include}",
+                          "--with-mpi=#{Formula["open-mpi"].prefix}",
+                          "--with-sparsehash=#{Formula["google-sparsehash"].prefix}",
+                          "--disable-dependency-tracking",
+                          "--disable-silent-rules"
     system "make", "install"
   end
 

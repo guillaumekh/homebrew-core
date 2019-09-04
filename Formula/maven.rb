@@ -1,9 +1,9 @@
 class Maven < Formula
   desc "Java-based project management"
   homepage "https://maven.apache.org/"
-  url "https://www.apache.org/dyn/closer.cgi?path=maven/maven-3/3.5.3/binaries/apache-maven-3.5.3-bin.tar.gz"
-  mirror "https://archive.apache.org/dist/maven/maven-3/3.5.3/binaries/apache-maven-3.5.3-bin.tar.gz"
-  sha256 "b52956373fab1dd4277926507ab189fb797b3bc51a2a267a193c931fffad8408"
+  url "https://www.apache.org/dyn/closer.cgi?path=maven/maven-3/3.6.1/binaries/apache-maven-3.6.1-bin.tar.gz"
+  mirror "https://archive.apache.org/dist/maven/maven-3/3.6.1/binaries/apache-maven-3.6.1-bin.tar.gz"
+  sha256 "2528c35a99c30f8940cc599ba15d34359d58bec57af58c1075519b8cd33b69e7"
 
   bottle :unneeded
 
@@ -24,8 +24,10 @@ class Maven < Formula
     # file will be found relative to it
     Pathname.glob("#{libexec}/bin/*") do |file|
       next if file.directory?
+
       basename = file.basename
       next if basename.to_s == "m2.conf"
+
       (bin/basename).write_env_script file, Language::Java.overridable_java_home_env
     end
   end

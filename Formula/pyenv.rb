@@ -1,22 +1,23 @@
 class Pyenv < Formula
   desc "Python version management"
   homepage "https://github.com/pyenv/pyenv"
-  url "https://github.com/pyenv/pyenv/archive/v1.2.3.tar.gz"
-  sha256 "cb76cdd39c9207960d3c64b919b1d48376772e7f105953d877c658f2497e4d52"
+  url "https://github.com/pyenv/pyenv/archive/v1.2.13.tar.gz"
+  sha256 "ebf9899f70cb04a6a6bf9835c37d9d7e4ed7dadb22dd8123b19d6d790a13fffe"
+  revision 1
   version_scheme 1
   head "https://github.com/pyenv/pyenv.git"
 
   bottle do
     cellar :any
-    sha256 "549654b4707a262e71807389011cfa56a0d1e674e2e16bd7270366151d1ef206" => :high_sierra
-    sha256 "86cb4dd57a8f9839f7830068ee2cb48d1715d6f23298362f3c0045641e34cdbf" => :sierra
-    sha256 "c48a8f38cd4ddcd343b2a981a0ad6e991b980c5600ad1099953c758f21cb7af0" => :el_capitan
+    sha256 "02ca7b702210e4ff420e6bab6248487537a09c843e495042e569d784607056e6" => :mojave
+    sha256 "fc4e014627b4a42b647c61219a7cf7882bca797104a2cc15d6243529593ee2eb" => :high_sierra
+    sha256 "c863f6b200535131653787ee07647f9a042b44bfd54d3d065366542dd9b0be3a" => :sierra
   end
 
-  depends_on "autoconf" => :recommended
-  depends_on "pkg-config" => :recommended
-  depends_on "openssl" => :recommended
-  depends_on "readline" => :recommended
+  depends_on "autoconf"
+  depends_on "openssl@1.1"
+  depends_on "pkg-config"
+  depends_on "readline"
 
   def install
     inreplace "libexec/pyenv", "/usr/local", HOMEBREW_PREFIX
@@ -28,6 +29,10 @@ class Pyenv < Formula
     %w[pyenv-install pyenv-uninstall python-build].each do |cmd|
       bin.install_symlink "#{prefix}/plugins/python-build/bin/#{cmd}"
     end
+
+    # Do not manually install shell completions. See:
+    #   - https://github.com/pyenv/pyenv/issues/1056#issuecomment-356818337
+    #   - https://github.com/Homebrew/homebrew-core/pull/22727
   end
 
   test do

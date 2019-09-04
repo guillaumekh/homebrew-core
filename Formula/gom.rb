@@ -3,25 +3,24 @@ class Gom < Formula
   homepage "https://wiki.gnome.org/Projects/Gom"
   url "https://download.gnome.org/sources/gom/0.3/gom-0.3.3.tar.xz"
   sha256 "ac57e34b5fe273ed306efaeabb346712c264e341502913044a782cdf8c1036d8"
-  revision 4
+  revision 6
 
   bottle do
-    cellar :any
-    sha256 "4af3ad57e78007aa38bbbf602df75c93e49699bff203f6b2c7085885ed5ece4f" => :high_sierra
-    sha256 "29436d1d80204799c37940197aab65182dadbfe1be66431c9a5f72404528eaa1" => :sierra
-    sha256 "536b1b030e14db2cc7540e0505a251b9227b79c6dd2449a0d6a980e81487da53" => :el_capitan
+    sha256 "e350f42cc200b16352b511d93e31bd77fe1bafae91bae450e950f9546e109b0b" => :mojave
+    sha256 "218193c3f957ef4c999a446bfa6049e978b69f40a40461afaef965b70aaa190a" => :high_sierra
+    sha256 "17e82d8af22b8db897ccded270b254c84d67cf7d4be699b2cdc0408982febe60" => :sierra
   end
 
   depends_on "gobject-introspection" => :build
-  depends_on "meson" => :build
+  depends_on "meson-internal" => :build
   depends_on "ninja" => :build
+  depends_on "pkg-config" => :build
+  depends_on "python" => :build
   depends_on "gdk-pixbuf"
   depends_on "gettext"
   depends_on "glib"
-  depends_on "py3cairo"
-  depends_on "pygobject3"
-  depends_on "python"
-  depends_on "sqlite"
+
+  patch :DATA
 
   def install
     ENV.refurbish_args
@@ -35,6 +34,7 @@ class Gom < Formula
 
     mkdir "build" do
       system "meson", "--prefix=#{prefix}", ".."
+      system "ninja"
       system "ninja", "install"
     end
   end
@@ -67,3 +67,44 @@ class Gom < Formula
     system "./test"
   end
 end
+
+__END__
+diff --git a/bindings/python/meson.build b/bindings/python/meson.build
+index feb4a9c..2fda8c1 100644
+--- a/bindings/python/meson.build
++++ b/bindings/python/meson.build
+@@ -1,33 +1 @@
+-python3 = import('python3').find_python()
+-
+-get_overridedir = '''
+-import os
+-import sysconfig
+-
+-libdir = sysconfig.get_config_var('LIBDIR')
+-
+-if not libdir:
+-  libdir = '/usr/lib'
+-
+-try:
+-  import gi
+-  overridedir = gi._overridesdir
+-except ImportError:
+-  purelibdir = sysconfig.get_path('purelib')
+-  overridedir = os.path.join(purelibdir, 'gi', 'overrides')
+-
+-if overridedir.startswith(libdir): # Should always be True..
+-  overridedir = overridedir[len(libdir) + 1:]
+-
+-print(overridedir)
+-'''
+-
+-ret = run_command([python3, '-c', get_overridedir])
+-
+-if ret.returncode() != 0
+-  error('Failed to determine pygobject overridedir')
+-else
+-  pygobject_override_dir = join_paths(get_option('libdir'), ret.stdout().strip())
+-endif
+-
+ install_data('gi/overrides/Gom.py', install_dir: pygobject_override_dir)
+

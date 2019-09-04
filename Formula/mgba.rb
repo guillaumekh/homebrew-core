@@ -1,27 +1,14 @@
 class Mgba < Formula
   desc "Game Boy Advance emulator"
   homepage "https://mgba.io/"
-  revision 2
+  url "https://github.com/mgba-emu/mgba/archive/0.7.2.tar.gz"
+  sha256 "ed635e05798d3fa0d55e5abb439f6d1708d519e4ecd5ed10b9bc6e319ed9dba7"
   head "https://github.com/mgba-emu/mgba.git"
 
-  stable do
-    url "https://github.com/mgba-emu/mgba/archive/0.6.1.tar.gz"
-    sha256 "7c78feb0aa12930b993ca1b220d282ed178e306621559e48bb168623030eb876"
-
-    # Remove for > 0.6.1
-    # Fix "MemoryModel.cpp:102:15: error: no viable overloaded '='"
-    # Upstream commit from 11 Dec 2017 "Qt: Fix build with Qt 5.10"
-    patch do
-      url "https://github.com/mgba-emu/mgba/commit/e31373560.patch?full_index=1"
-      sha256 "5311b19dea0848772bdd00b354f9fca741b2bfd2cf65eab8a8c556e6fb748b8e"
-    end
-  end
-
   bottle do
-    cellar :any
-    sha256 "225961abcc72b538b35be18e5348a5af0c0f6fe46b0daef9b581594b26a6b0d0" => :high_sierra
-    sha256 "79d5e25543474d0715a369cfbe862f1c8d79b79c260a7cecdba2f38f6031f42d" => :sierra
-    sha256 "9b7ad131ba17d492c53af30d996aeaac3814acd810aa5f3f9a73bfe098727ca4" => :el_capitan
+    sha256 "0f10a479ab180103084f35e3e897c5b0a417444366b8ecd27ea4d466a12bcf62" => :mojave
+    sha256 "4876e9acb21bbed3eaaf177593a7c17a96149976ca016f9ca87942fa0b641a29" => :high_sierra
+    sha256 "fabba640a9ab7f6637132c74f9416d5276eba1e509e7784c092860853be72682" => :sierra
   end
 
   depends_on "cmake" => :build

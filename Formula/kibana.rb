@@ -1,23 +1,26 @@
-require "language/node"
-
 class Kibana < Formula
   desc "Analytics and search dashboard for Elasticsearch"
   homepage "https://www.elastic.co/products/kibana"
   url "https://github.com/elastic/kibana.git",
-      :tag => "v6.2.3",
-      :revision => "2582ab6060209a9fc6a67275fc52ce08ae74c957"
+      :tag      => "v6.8.2",
+      :revision => "f027fad862817a52175b9ad2663e5126b9bad428"
   head "https://github.com/elastic/kibana.git"
 
   bottle do
-    sha256 "90472f248ca2441e301be5ec4d66aabff4cf15834df94cd3b2c8f6f05a7f1e5d" => :high_sierra
-    sha256 "71ec08d61380f51b2bba0340e40a4334cfb22f97c858390b3bcdcc9fbdf35fe7" => :sierra
-    sha256 "1c2717d539ac5f2f42d906376ba5e3464b4b13ba1114887a67ac0633da336c7c" => :el_capitan
+    cellar :any_skip_relocation
+    sha256 "7a2c8d25f188d3d6c0127b52ccf261ea924f865e0d1b1417dd3a6d727d1828b9" => :mojave
+    sha256 "e9554d0a464711f10572baccca5ad887d48f558aea119ed65f87c69b726e1378" => :high_sierra
+    sha256 "d5a78f410e3455924a9922c2b2fea0b46d4d809def59141fe6ede8aaff949345" => :sierra
   end
 
   resource "node" do
-    url "https://github.com/nodejs/node.git",
-        :tag => "v6.12.2",
-        :revision => "381f5ec383dbb164cf3edd1a9de1811cf1cfdc65"
+    url "https://nodejs.org/dist/v10.15.2/node-v10.15.2.tar.xz"
+    sha256 "b8bb2da7cb016e895bc2f70009a420f6b8d519e66548624b6130bbfbd5118c59"
+  end
+
+  resource "yarn" do
+    url "https://yarnpkg.com/downloads/1.16.0/yarn-v1.16.0.tar.gz"
+    sha256 "df202627d9a70cf09ef2fb11cb298cb619db1b958590959d6f6e571b50656029"
   end
 
   def install
@@ -26,18 +29,31 @@ class Kibana < Formula
       system "make", "install"
     end
 
-    # do not build packages for other platforms
-    inreplace buildpath/"tasks/config/platforms.js", /('(linux-x64|windows-x64)',?(?!;))/, "// \\1"
+    # remove non open source files
+    rm_rf "x-pack"
+    inreplace "package.json", /"x-pack":.*/, ""
+
+    # patch build to not try to read tsconfig.json's from the removed x-pack folder
+    inreplace "src/dev/typescript/projects.ts" do |s|
+      s.gsub! "new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),", ""
+      s.gsub! "new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), 'x-pack/test'),", ""
+    end
 
     # trick the build into thinking we've already downloaded the Node.js binary
     mkdir_p buildpath/".node_binaries/#{resource("node").version}/darwin-x64"
 
-    # set npm env and fix cache edge case (https://github.com/Homebrew/brew/pull/37#issuecomment-208840366)
+    # run yarn against the bundled node version and not our node formula
+    (buildpath/"yarn").install resource("yarn")
+    (buildpath/".brew_home/.yarnrc").write "build-from-source true\n"
+    ENV.prepend_path "PATH", buildpath/"yarn/bin"
     ENV.prepend_path "PATH", prefix/"libexec/node/bin"
-    system "npm", "install", "-ddd", "--build-from-source", "--#{Language::Node.npm_cache_config}"
-    system "npm", "run", "build", "--", "--release", "--skip-os-packages", "--skip-archives"
+    system "yarn", "kbn", "bootstrap"
+    system "yarn", "build", "--oss", "--release", "--skip-os-packages", "--skip-archives"
 
-    prefix.install Dir["build/kibana-#{version}-darwin-x86_64/{bin,config,node_modules,optimize,package.json,src,ui_framework,webpackShims}"]
+    prefix.install Dir
+      .glob("build/oss/kibana-#{version}-darwin-x86_64/**")
+      .reject { |f| File.fnmatch("build/oss/kibana-#{version}-darwin-x86_64/{node, data, plugins}", f) }
+    mv "licenses/APACHE-LICENSE-2.0.txt", "LICENSE.txt" # install OSS license
 
     inreplace "#{bin}/kibana", %r{/node/bin/node}, "/libexec/node/bin/node"
     inreplace "#{bin}/kibana-plugin", %r{/node/bin/node}, "/libexec/node/bin/node"
@@ -60,7 +76,7 @@ class Kibana < Formula
     If you wish to preserve your plugins upon upgrade, make a copy of
     #{opt_prefix}/plugins before upgrading, and copy it into the
     new keg location after upgrading.
-    EOS
+  EOS
   end
 
   plist_options :manual => "kibana"

@@ -1,33 +1,27 @@
 class PerconaServer < Formula
   desc "Drop-in MySQL replacement"
   homepage "https://www.percona.com"
-  url "https://www.percona.com/downloads/Percona-Server-5.7/Percona-Server-5.7.21-20/source/tarball/percona-server-5.7.21-20.tar.gz"
-  sha256 "842785e9b73c606be00ea74f568615d3427362fbeed5c136d8f509f03c9d43a6"
+  url "https://www.percona.com/downloads/Percona-Server-8.0/Percona-Server-8.0.13-4/source/tarball/percona-server-8.0.13-4.tar.gz"
+  sha256 "0a42a0e51e3c27fa1fb2eb3e8d057a33e3ef77691f651b92b5ba6c9fe2890b9b"
 
   bottle do
-    sha256 "f486ad7e346bc716f258eecb66fb852da697333141a286f0a0076fa48f5e743c" => :high_sierra
-    sha256 "c9cec18ec850f01cb7db22dd379aabe5bcbd00cb94269068cc1102c10c96d7c7" => :sierra
-    sha256 "e16b3560518cf0625196e0076c33176b1af5e90d57e528b726dde89704bc59d1" => :el_capitan
+    sha256 "f4caccf7602504cf3c7049f34ef0863c84d42e328c18f240d3ca803f13f231e7" => :mojave
+    sha256 "11d0784cccc954f1ba7932efb27e2d11559451762528090afff7ab6e554ab53b" => :high_sierra
+    sha256 "96dbc394bc381333e1ffe4e39e55260033486258ee3248bab29a4c3c52ef2492" => :sierra
   end
 
-  option "with-debug", "Build with debug support"
-  option "with-embedded", "Build the embedded server"
-  option "with-local-infile", "Build with local infile loading support"
-  option "with-memcached", "Build with InnoDB Memcached plugin"
-  option "with-test", "Build with unit tests"
-
-  deprecated_option "enable-debug" => "with-debug"
-  deprecated_option "enable-local-infile" => "with-local-infile"
-  deprecated_option "enable-memcached" => "with-memcached"
-  deprecated_option "with-tests" => "with-test"
+  pour_bottle? do
+    reason "The bottle needs a var/mysql datadir (yours is var/percona)."
+    satisfy { datadir == var/"mysql" }
+  end
 
   depends_on "cmake" => :build
-  depends_on "openssl"
 
   # https://github.com/Homebrew/homebrew-core/issues/1475
   # Needs at least Clang 3.3, which shipped alongside Lion.
-  # Note: MySQL themselves don't support anything below El Capitan.
-  depends_on :macos => :lion
+  # Note: MySQL themselves don't support anything below Sierra.
+  depends_on :macos => :yosemite
+  depends_on "openssl"
 
   conflicts_with "mariadb", "mysql", "mysql-cluster",
     :because => "percona, mariadb, and mysql install the same binaries."
@@ -36,9 +30,16 @@ class PerconaServer < Formula
   conflicts_with "mariadb-connector-c",
     :because => "both install plugins"
 
+  # https://bugs.mysql.com/bug.php?id=86711
+  # https://github.com/Homebrew/homebrew-core/pull/20538
+  fails_with :clang do
+    build 800
+    cause "Wrong inlining with Clang 8.0, see MySQL Bug #86711"
+  end
+
   resource "boost" do
-    url "https://downloads.sourceforge.net/project/boost/boost/1.59.0/boost_1_59_0.tar.bz2"
-    sha256 "727a932322d94287b62abb1bd2d41723eec4356a7728909e38adb65ca25241ca"
+    url "https://downloads.sourceforge.net/project/boost/boost/1.67.0/boost_1_67_0.tar.bz2"
+    sha256 "2684c972994ee57fc5632e03bf044746f6eb45d4920c343937a465fd67a5adba"
   end
 
   # Where the database files should be located. Existing installs have them
@@ -48,22 +49,12 @@ class PerconaServer < Formula
     @datadir ||= (var/"percona").directory? ? var/"percona" : var/"mysql"
   end
 
-  pour_bottle? do
-    reason "The bottle needs a var/mysql datadir (yours is var/percona)."
-    satisfy { datadir == var/"mysql" }
-  end
-
   def install
-    # Set HAVE_MEMSET_S flag to fix compilation
-    # https://bugs.launchpad.net/percona-server/+bug/1741647
-    ENV.prepend "CPPFLAGS", "-DHAVE_MEMSET_S=1"
-
-    # https://dev.mysql.com/doc/refman/5.7/en/source-configuration-options.html
     # -DINSTALL_* are relative to `CMAKE_INSTALL_PREFIX` (`prefix`)
     args = %W[
       -DCOMPILATION_COMMENT=Homebrew
-      -DDEFAULT_CHARSET=utf8
-      -DDEFAULT_COLLATION=utf8_general_ci
+      -DDEFAULT_CHARSET=utf8mb4
+      -DDEFAULT_COLLATION=utf8mb4_0900_ai_ci
       -DINSTALL_DOCDIR=share/doc/#{name}
       -DINSTALL_INCLUDEDIR=include/mysql
       -DINSTALL_INFODIR=share/info
@@ -72,8 +63,12 @@ class PerconaServer < Formula
       -DINSTALL_PLUGINDIR=lib/plugin
       -DMYSQL_DATADIR=#{datadir}
       -DSYSCONFDIR=#{etc}
-      -DWITH_EDITLINE=system
       -DWITH_SSL=yes
+      -DWITH_UNIT_TESTS=OFF
+      -DWITH_EMBEDDED_SERVER=ON
+      -DENABLED_LOCAL_INFILE=1
+      -DWITH_INNODB_MEMCACHED=ON
+      -DWITH_EDITLINE=system
     ]
 
     # MySQL >5.7.x mandates Boost as a requirement to build & has a strict
@@ -90,25 +85,6 @@ class PerconaServer < Formula
     # https://bugs.launchpad.net/percona-server/+bug/1531446
     args.concat %w[-DWITHOUT_TOKUDB=1]
 
-    # Build with debug support
-    args << "-DWITH_DEBUG=1" if build.with? "debug"
-
-    # Build the embedded server
-    args << "-DWITH_EMBEDDED_SERVER=ON" if build.with? "embedded"
-
-    # Build with local infile loading support
-    args << "-DENABLED_LOCAL_INFILE=1" if build.with? "local-infile"
-
-    # Build with InnoDB Memcached plugin
-    args << "-DWITH_INNODB_MEMCACHED=ON" if build.with? "memcached"
-
-    # To enable unit testing at build, we need to download the unit testing suite
-    if build.with? "test"
-      args << "-DENABLE_DOWNLOADS=ON"
-    else
-      args << "-DWITH_UNIT_TESTS=OFF"
-    end
-
     system "cmake", ".", *std_cmake_args, *args
     system "make"
     system "make", "install"
@@ -117,8 +93,8 @@ class PerconaServer < Formula
       system "./mysql-test-run.pl", "status", "--vardir=#{Dir.mktmpdir}"
     end
 
-    # Remove the tests directory if they are not built
-    rm_rf prefix/"mysql-test" if build.without? "test"
+    # Remove the tests directory
+    rm_rf prefix/"mysql-test"
 
     # Don't create databases inside of the prefix!
     # See: https://github.com/Homebrew/homebrew/issues/4975
@@ -189,7 +165,7 @@ class PerconaServer < Formula
       <string>#{datadir}</string>
     </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do

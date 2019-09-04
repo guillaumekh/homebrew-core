@@ -1,27 +1,26 @@
 class DiffPdf < Formula
   desc "Visually compare two PDF files"
   homepage "https://vslavik.github.io/diff-pdf/"
-  url "https://github.com/vslavik/diff-pdf/archive/v0.2.tar.gz"
-  sha256 "cb90f2e0fd4bc3fe235111f982bc20455a1d6bc13f4219babcba6bd60c1fe466"
-  revision 28
+  url "https://github.com/vslavik/diff-pdf/releases/download/v0.3/diff-pdf-0.3.tar.gz"
+  sha256 "8f1beb45d48fecfb09c802e95154ad9b8d4b73e90796eaf7ab835f107b495da0"
+  revision 6
 
   bottle do
     cellar :any
-    sha256 "612be87835450b42bc13dfc8bc996a8f7d8bae75c255f322a8bbc4c69eccb2a9" => :high_sierra
-    sha256 "c349724e7c18707efcdc9d3777ed0a739578579afcdf007970ae1d7870052171" => :sierra
-    sha256 "67aebcb0b22f4f66f7c25544e75c6b3d31ca01434df855350cd4629ae2491986" => :el_capitan
+    sha256 "83d3d4c14664c8f4dfed2aa08ee795e0a791e742de9cc17dfefbcc448f0aa82f" => :mojave
+    sha256 "371a5f3452bc778172744a54490b1510d9058f24c86faf95a4eb6bba72603cf3" => :high_sierra
+    sha256 "f2405a671784efc1abec27952ef302676c924152df740cce55a375fb84b258de" => :sierra
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "automake" => :build
   depends_on "autoconf" => :build
-  depends_on :x11
-  depends_on "wxmac"
+  depends_on "automake" => :build
+  depends_on "pkg-config" => :build
   depends_on "cairo"
   depends_on "poppler"
+  depends_on "wxmac"
+  depends_on :x11
 
   def install
-    system "./bootstrap"
     system "./configure", "--disable-dependency-tracking",
                           "--disable-silent-rules",
                           "--prefix=#{prefix}"

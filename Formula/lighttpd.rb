@@ -1,44 +1,40 @@
 class Lighttpd < Formula
   desc "Small memory footprint, flexible web-server"
   homepage "https://www.lighttpd.net/"
-  url "https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-1.4.48.tar.xz"
-  sha256 "0f8ad5aac7529d7b948b9d7e8cd0b4a9e177309d85d6bf6516e28e6e40d74f36"
+  url "https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-1.4.54.tar.xz"
+  sha256 "cf14cce2254a96d8fcb6d3181e1a3c29a8f832531c3e86ff6f2524ecda9a8721"
 
   bottle do
-    sha256 "b7b7b0351d2ad65f6c71c594f4df2f865c31834007e0811d99356c339c53c3e4" => :high_sierra
-    sha256 "2eaa0285cf8e0e4616b804e5a7d4059e0d8549e90c167dfc8bea2ef269706f80" => :sierra
-    sha256 "c8aaafd41d8b8bdd4b823a09694246752b64cd3db9a8557e8c4c0d0716372785" => :el_capitan
+    sha256 "63c0882928954711b5d5acfa09812f061e9ecb3fc9b1b484d39711d48941483e" => :mojave
+    sha256 "b8312743e81fede9ccc01b9ed79a558baeeff4561686395120c2ce01212ca3c1" => :high_sierra
+    sha256 "0dac1d800623754b0342433e8671cd8241386cf4770cbff08dca4c36265be3fa" => :sierra
   end
 
-  option "with-lua@5.1", "Include Lua scripting support for mod_magnet"
-  deprecated_option "with-lua51" => "with-lua@5.1"
-
-  depends_on "pkg-config" => :build
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
-  depends_on "pcre"
+  depends_on "pkg-config" => :build
+  depends_on "openldap"
   depends_on "openssl"
-  depends_on "lua@5.1" => :optional
-  depends_on "libev" => :optional
+  depends_on "pcre"
 
   # default max. file descriptors; this option will be ignored if the server is not started as root
   MAX_FDS = 512
 
   def config_path
-    etc+"lighttpd"
+    etc/"lighttpd"
   end
 
   def log_path
-    var+"log/lighttpd"
+    var/"log/lighttpd"
   end
 
   def www_path
-    var+"www"
+    var/"www"
   end
 
   def run_path
-    var+"lighttpd"
+    var/"lighttpd"
   end
 
   def install
@@ -52,9 +48,6 @@ class Lighttpd < Formula
       --with-zlib
       --with-bzip2
     ]
-
-    args << "--with-lua" if build.with? "lua@5.1"
-    args << "--with-libev" if build.with? "libev"
 
     # autogen must be run, otherwise prebuilt configure may complain
     # about a version mismatch between included automake and Homebrew's
@@ -100,7 +93,7 @@ class Lighttpd < Formula
 
     The default port has been set in #{config_path}/lighttpd.conf to 8080 so that
     lighttpd can run without sudo.
-    EOS
+  EOS
   end
 
   plist_options :manual => "lighttpd -f #{HOMEBREW_PREFIX}/etc/lighttpd/lighttpd.conf"
@@ -141,10 +134,10 @@ class Lighttpd < Formula
       </dict>
     </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do
-    system "#{bin}/lighttpd", "-t", "-f", config_path+"lighttpd.conf"
+    system "#{bin}/lighttpd", "-t", "-f", config_path/"lighttpd.conf"
   end
 end

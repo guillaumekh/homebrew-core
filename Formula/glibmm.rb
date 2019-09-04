@@ -1,21 +1,20 @@
 class Glibmm < Formula
   desc "C++ interface to glib"
   homepage "https://www.gtkmm.org/"
-  url "https://download.gnome.org/sources/glibmm/2.54/glibmm-2.54.1.tar.xz"
-  sha256 "7cc28c732b04d70ed34f0c923543129083cfb90580ea4a2b4be5b38802bf6a4a"
+  url "https://download.gnome.org/sources/glibmm/2.60/glibmm-2.60.0.tar.xz"
+  sha256 "a3a1b1c9805479a16c0018acd84b3bfff23a122aee9e3c5013bb81231aeef2bc"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "46ff598fd6c542432fcb474b56ad151e29f217ad588933bf350b377f51c969dd" => :high_sierra
-    sha256 "91e373202e1118e3874ecc46abfcad97faf830d0cdc94f1a974272e8df669bd4" => :sierra
-    sha256 "03ee806d8bad38ca85e0000c904276bae4222c01cee4f3a8188cbdef7473426a" => :el_capitan
+    sha256 "976b138f9cb6d0456b93d41fd4fe288b72774bc4e1fca8ba028f18956463e139" => :mojave
+    sha256 "c68640ee525534c89c2e737760c375217588ddd29b30a71a3d68f7d2b412c827" => :high_sierra
+    sha256 "c186a363d1eb3608aaa4ec6cb368babbce60d96e3a6e224ecd00eafac475037d" => :sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on "libsigc++"
   depends_on "glib"
-
-  needs :cxx11
+  depends_on "libsigc++"
 
   def install
     ENV.cxx11

@@ -1,32 +1,31 @@
 class Irssi < Formula
   desc "Modular IRC client"
   homepage "https://irssi.org/"
-  url "https://github.com/irssi/irssi/releases/download/1.1.1/irssi-1.1.1.tar.xz"
-  sha256 "784807e7a1ba25212347f03e4287cff9d0659f076edfb2c6b20928021d75a1bf"
+  url "https://github.com/irssi/irssi/releases/download/1.2.2/irssi-1.2.2.tar.xz"
+  sha256 "6727060c918568ba2ff4295ad736128dba0b995d7b20491bca11f593bd857578"
 
   bottle do
-    sha256 "6698db08f5b35df7bf0acbb8f005f79e3598999efcd78bdc3f82cc0eaaac2a6f" => :high_sierra
-    sha256 "dc216333ed72a035a6f817e6970b74d82c06994a2bbaeda7bfe3e2c1b7e087dc" => :sierra
-    sha256 "10a3178cc7c7542d2350830d8e2d08b16afa1d33d923193de46cabf58086509e" => :el_capitan
+    sha256 "c8dda1f1cd62fc666406f3db68a9a34cd16ce4acce1082db45d7b575af5860be" => :mojave
+    sha256 "de978c2c68c4254d5fea004006201743cfcf686c76a56cba62ab72a7bf0d9936" => :high_sierra
+    sha256 "b0ea780071ba74669e4f31db648ca4b5de95d3372cb0fc73d41a90e2b6c6947a" => :sierra
   end
 
   head do
     url "https://github.com/irssi/irssi.git"
-    depends_on "automake" => :build
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
     depends_on "libtool" => :build
     depends_on "lynx" => :build
   end
 
-  option "with-dante", "Build with SOCKS support"
-  option "without-perl", "Build without perl support"
-
   depends_on "pkg-config" => :build
   depends_on "glib"
-  depends_on "openssl" => :recommended
-  depends_on "dante" => :optional
+  depends_on "openssl@1.1"
+  uses_from_macos "perl"
 
   def install
+    ENV.delete "HOMEBREW_SDKROOT" if MacOS.version == :high_sierra
+
     args = %W[
       --disable-dependency-tracking
       --prefix=#{prefix}
@@ -34,24 +33,18 @@ class Irssi < Formula
       --with-bot
       --with-proxy
       --enable-true-color
-      --with-socks=#{build.with?("dante") ? "yes" : "no"}
+      --with-socks=no
       --with-ncurses=#{MacOS.sdk_path}/usr
+      --with-perl=yes
+      --with-perl-lib=#{lib}/perl5/site_perl
     ]
 
-    if build.with? "perl"
-      args << "--with-perl=yes"
-      args << "--with-perl-lib=#{lib}/perl5/site_perl"
-    else
-      args << "--with-perl=no"
-    end
-
-    args << "--disable-ssl" if build.without? "openssl"
-
     if build.head?
+      ENV["NOCONFIGURE"] = "yes"
       system "./autogen.sh", *args
-    else
-      system "./configure", *args
     end
+
+    system "./configure", *args
     # "make" and "make install" must be done separately on some systems
     system "make"
     system "make", "install"
@@ -62,5 +55,13 @@ class Irssi < Formula
       pipe.puts "/quit\n"
       pipe.close_write
     end
+
+    # This is not how you'd use Perl with Irssi but it is enough to be
+    # sure the Perl element didn't fail to compile, which is needed
+    # because upstream treats Perl build failures as non-fatal.
+    # To debug a Perl problem copy the following test at the end of the install
+    # block to surface the relevant information from the build warnings.
+    ENV["PERL5LIB"] = lib/"perl5/site_perl"
+    system "perl", "-e", "use Irssi"
   end
 end

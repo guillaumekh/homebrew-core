@@ -1,22 +1,18 @@
 class BoostPython < Formula
   desc "C++ library for C++/Python2 interoperability"
   homepage "https://www.boost.org/"
-  url "https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.bz2"
-  sha256 "5721818253e6a0989583192f96782c4a98eb6204965316df9f5ad75819225ca9"
-  revision 1
-
+  url "https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.bz2"
+  sha256 "430ae8354789de4fd19ee52f3b1f739e1fba576f0aded0897c3c2bc00fb38778"
   head "https://github.com/boostorg/boost.git"
 
   bottle do
     cellar :any
-    sha256 "908a5484b565b1ee55ccec7d1f3e1a46f8f0e8132ce1b3a77c83d9753b35ebca" => :high_sierra
-    sha256 "a78c1be0a6f246b97a727891798217a9ef169dfd37cc5a8a5b1defa4ae4483e5" => :sierra
-    sha256 "40b97b1095e006a62935b93e966134c469b6ad3faf0e37980b813375842c5265" => :el_capitan
+    sha256 "bcbd397976693b28ef44efb7012dd4fdfe758f480630df98d7645349d1590260" => :mojave
+    sha256 "7e990bb5bf4cc95ce30c5c99b7cfbbfb765434675dca94cbf3b42796c94bc865" => :high_sierra
+    sha256 "6d2a7161aff7e404b815ba853dea4b30f2c4691b8181d997b384c7bc4f7ca5dd" => :sierra
   end
 
   depends_on "boost"
-
-  needs :cxx11
 
   def install
     # "layout" should be synchronized with boost
@@ -24,13 +20,15 @@ class BoostPython < Formula
             "--libdir=#{lib}",
             "-d2",
             "-j#{ENV.make_jobs}",
-            "--layout=tagged",
+            "--layout=tagged-1.66",
+            # --no-cmake-config should be dropped if possible in next version
+            "--no-cmake-config",
             "threading=multi,single",
             "link=shared,static"]
 
-    # Trunk starts using "clang++ -x c" to select C compiler which breaks C++11
-    # handling using ENV.cxx11. Using "cxxflags" and "linkflags" still works.
-    args << "cxxflags=-std=c++11"
+    # Boost is using "clang++ -x c" to select C compiler which breaks C++14
+    # handling using ENV.cxx14. Using "cxxflags" and "linkflags" still works.
+    args << "cxxflags=-std=c++14"
     if ENV.compiler == :clang
       args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++"
     end
@@ -59,11 +57,13 @@ class BoostPython < Formula
       }
     EOS
 
+    pyprefix = `python-config --prefix`.chomp
     pyincludes = Utils.popen_read("python-config --includes").chomp.split(" ")
     pylib = Utils.popen_read("python-config --ldflags").chomp.split(" ")
 
-    system ENV.cxx, "-shared", "hello.cpp", "-L#{lib}", "-lboost_python", "-o",
-           "hello.so", *pyincludes, *pylib
+    system ENV.cxx, "-shared", "hello.cpp", "-L#{lib}", "-lboost_python27",
+                    "-o", "hello.so", "-I#{pyprefix}/include/python2.7",
+                    *pyincludes, *pylib
 
     output = <<~EOS
       from __future__ import print_function

@@ -1,26 +1,25 @@
 class GdkPixbuf < Formula
   desc "Toolkit for image loading and pixel buffer manipulation"
   homepage "https://gtk.org"
-  url "https://download.gnome.org/sources/gdk-pixbuf/2.36/gdk-pixbuf-2.36.11.tar.xz"
-  sha256 "ae62ab87250413156ed72ef756347b10208c00e76b222d82d9ed361ed9dde2f3"
+  url "https://download.gnome.org/sources/gdk-pixbuf/2.38/gdk-pixbuf-2.38.1.tar.xz"
+  sha256 "f19ff836ba991031610dcc53774e8ca436160f7d981867c8c3a37acfe493ab3a"
   revision 1
 
   bottle do
-    sha256 "9ab66c2e096eae435f0a7554db333715de935c347ebc4560dcb0c595f4bd28d5" => :high_sierra
-    sha256 "d39abb17ec8e53cb2db8fe63e62905be87b0dda875da0f84c6ca63ef5c08863c" => :sierra
-    sha256 "93079b1df5573210380ab0cbae77fc9b50bb9a4ec2d5a51c4b493d64f15df481" => :el_capitan
+    sha256 "183c810ede98f4732b2fcbe781670c4f4c5d9e75f4530975864abb524c1911dd" => :mojave
+    sha256 "f7d10a967373df44ce4e0ca18965428f1404513195f1403e7964511b2e091d57" => :high_sierra
+    sha256 "6c98ec526d0c3fbee49f46339d9997e7aeba93a55a655d1b521f93c26ab16c98" => :sierra
   end
 
-  option "without-modules", "Disable dynamic module loading"
-  option "with-included-loaders=", "Build the specified loaders into gdk-pixbuf"
-
   depends_on "gobject-introspection" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
+  depends_on "python" => :build
   depends_on "glib"
   depends_on "jpeg"
-  depends_on "libtiff"
   depends_on "libpng"
-  depends_on "jasper" => :optional
+  depends_on "libtiff"
 
   # gdk-pixbuf has an internal version number separate from the overall
   # version number that specifies the location of its module and cache
@@ -35,30 +34,27 @@ class GdkPixbuf < Formula
   end
 
   def install
-    # fix libtool versions
-    # https://bugzilla.gnome.org/show_bug.cgi?id=776892
-    inreplace "configure", /LT_VERSION_INFO=.+$/, "LT_VERSION_INFO=\"3602:0:3602\""
-    ENV.append_to_cflags "-DGDK_PIXBUF_LIBDIR=\\\"#{HOMEBREW_PREFIX}/lib\\\""
+    inreplace "gdk-pixbuf/meson.build",
+              "-DGDK_PIXBUF_LIBDIR=\"@0@\"'.format(gdk_pixbuf_libdir)",
+              "-DGDK_PIXBUF_LIBDIR=\"@0@\"'.format('#{HOMEBREW_PREFIX}/lib')"
+
     args = %W[
-      --disable-dependency-tracking
-      --disable-maintainer-mode
-      --enable-debug=no
       --prefix=#{prefix}
-      --disable-Bsymbolic
-      --enable-static
-      --without-gdiplus
-      --enable-introspection=yes
+      -Dx11=false
+      -Ddocs=false
+      -Dgir=true
+      -Drelocatable=false
+      -Dnative_windows_loaders=false
+      -Dinstalled_tests=false
+      -Dman=false
     ]
 
-    args << "--with-libjasper" if build.with?("jasper")
-    args << "--disable-modules" if build.without?("modules")
-
-    included_loaders = ARGV.value("with-included-loaders")
-    args << "--with-included-loaders=#{included_loaders}" if included_loaders
-
-    system "./configure", *args
-    system "make"
-    system "make", "install"
+    ENV["DESTDIR"] = "/"
+    mkdir "build" do
+      system "meson", *args, ".."
+      system "ninja", "-v"
+      system "ninja", "install"
+    end
 
     # Other packages should use the top-level modules directory
     # rather than dumping their files into the gdk-pixbuf keg.
@@ -67,9 +63,6 @@ class GdkPixbuf < Formula
       s.change_make_var! "gdk_pixbuf_binarydir",
         HOMEBREW_PREFIX/"lib/gdk-pixbuf-#{gdk_so_ver}"/libv
     end
-
-    # Remove the cache. We will regenerate it in post_install
-    (lib/"gdk-pixbuf-#{gdk_so_ver}/#{gdk_module_ver}/loaders.cache").unlink
   end
 
   # The directory that loaders.cache gets linked into, also has the "loaders"

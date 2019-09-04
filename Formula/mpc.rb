@@ -1,13 +1,13 @@
 class Mpc < Formula
   desc "Command-line music player client for mpd"
   homepage "https://www.musicpd.org/clients/mpc/"
-  url "https://www.musicpd.org/download/mpc/0/mpc-0.29.tar.xz"
-  sha256 "02f1daec902cb48f8cdaa6fe21c7219f6231b091dddbe437a3a4fb12cb07b9d3"
+  url "https://www.musicpd.org/download/mpc/0/mpc-0.31.tar.xz"
+  sha256 "62373e83a8a165b2ed43967975efecd3feee530f4557d6b861dd08aa89d52b2d"
 
   bottle do
-    sha256 "baffb4e58d39af2f18d3def335cb231826e1a94fafa4f31367e7372dbbfe769f" => :high_sierra
-    sha256 "400ac144b7f8ca93a2cf2489e0b25031a0086b95e283c6537b037acf008e80cf" => :sierra
-    sha256 "0ed8bc8a4a93e8df393e23d19229719ff057ebd3a6e27ff42324451753c399d0" => :el_capitan
+    sha256 "a0978aee21d1d4326cac85904ad4dc381ffd0fae96c66b98912ecd5260b548a4" => :mojave
+    sha256 "70bf0925e52814689cc58579288dafbefcd512caf3e4bcaa48f78d6c84fd7f36" => :high_sierra
+    sha256 "34dc577f9ac9551204d7c36448468da5a69c152b2de21622fc5e649c051a98de" => :sierra
   end
 
   depends_on "meson" => :build
@@ -19,9 +19,13 @@ class Mpc < Formula
     system "meson", "--prefix=#{prefix}", ".", "output"
     system "ninja", "-C", "output"
     system "ninja", "-C", "output", "install"
+
+    bash_completion.install "contrib/mpc-completion.bash" => "mpc"
+    rm share/"doc/mpc/contrib/mpc-completion.bash"
   end
 
   test do
     assert_match "query", shell_output("#{bin}/mpc list 2>&1", 1)
+    assert_match "-F _mpc", shell_output("source #{bash_completion}/mpc && complete -p mpc")
   end
 end

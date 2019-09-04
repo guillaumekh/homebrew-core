@@ -1,47 +1,42 @@
 class Sslsplit < Formula
   desc "Man-in-the-middle attacks against SSL encrypted network connections"
   homepage "https://www.roe.ch/SSLsplit"
-  url "https://mirror.roe.ch/rel/sslsplit/sslsplit-0.5.2.tar.bz2"
-  sha256 "f32c7fd760a45bb521adb8d96c819173fcaed1964bf114e666fcd7cf7ff043a8"
+  url "https://github.com/droe/sslsplit/archive/0.5.4.tar.gz"
+  sha256 "3338256598c0a8af6cc564609f3bce75cf2a9d74c32583bf96253a2ea0ef29fe"
+  revision 1
   head "https://github.com/droe/sslsplit.git", :branch => "develop"
 
   bottle do
     cellar :any
-    sha256 "77fecfb100b0790546886a4aa51af7799505cc656ba2950c6d49b93801aed621" => :high_sierra
-    sha256 "ea1ed69cb35e34a67e956549ce71ae3043e1ca48bb436c53d244a7cef93534e1" => :sierra
-    sha256 "a772d1ae52d6e4c89fd90339ceb5f9a8739246ecb73acbf50fb292814b9ec36d" => :el_capitan
+    sha256 "c1f9380b92bc8f9d983afb3b31b9325feac9061d1eb269d3c5a3f11746a6f3f3" => :mojave
+    sha256 "338a4fbd4829cf5072397bc17fe3cb5c8c3bdc0eb7b33e8521f7d34c000039e3" => :high_sierra
+    sha256 "d8f353979332952f8964d669394fa270e1091f84aa4e0d1e1df1ec8f85bf3880" => :sierra
   end
 
   depends_on "check" => :build
   depends_on "pkg-config" => :build
   depends_on "libevent"
+  depends_on "libnet"
+  depends_on "libpcap"
   depends_on "openssl"
 
   def install
-    unless build.head?
-      ENV.deparallelize
-      inreplace "GNUmakefile" do |s|
-        s.gsub! "-o $(BINUID) -g $(BINGID)", ""
-        s.gsub! "-o $(MANUID) -g $(MANGID)", ""
-      end
-    end
+    # Work around https://github.com/droe/sslsplit/issues/251
+    inreplace "GNUmakefile", "$(DESTDIR)/var/", "$(DESTDIR)$(PREFIX)/var/"
+
     system "make", "test"
     system "make", "install", "PREFIX=#{prefix}"
   end
 
   test do
-    pid_webrick = fork { exec "ruby", "-rwebrick", "-e", "s = WEBrick::HTTPServer.new(:Port => 8000); s.mount_proc(\"/\") { |req,res| res.body = \"sslsplit test\"} ; s.start" }
-    pid_sslsplit = fork { exec "#{bin}/sslsplit", "-P", "http", "127.0.0.1", "8080", "127.0.0.1", "8000" }
-    sleep 1
-    # Workaround to kill all processes from sslsplit
-    pid_sslsplit_child = `pgrep -P #{pid_sslsplit}`.to_i
+    require "socket"
 
-    begin
-      assert_equal("sslsplit test", shell_output("curl -s http://localhost:8080/test"))
-    ensure
-      Process.kill 9, pid_sslsplit_child
-      Process.kill 9, pid_webrick
-      Process.wait pid_webrick
-    end
+    server = TCPServer.new(0)
+    port = server.addr[1]
+    server.close
+
+    cmd = "#{bin}/sslsplit -D http 0.0.0.0 #{port} www.roe.ch 80"
+    output = pipe_output("(#{cmd} & PID=$! && sleep 3 ; kill $PID) 2>&1")
+    assert_match "Starting main event loop", output
   end
 end

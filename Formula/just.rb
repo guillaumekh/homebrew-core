@@ -1,20 +1,20 @@
 class Just < Formula
   desc "Handy way to save and run project-specific commands"
   homepage "https://github.com/casey/just"
-  url "https://github.com/casey/just/archive/v0.3.10.tar.gz"
-  sha256 "b1b73609799883500bf57060ef48d056cc191662d67e18b300bbcc6e644d1529"
+  url "https://github.com/casey/just/archive/v0.4.4.tar.gz"
+  sha256 "131955a54ff1622349382288ba20db64b01acff802a42b719dd7ebcb2e9c8983"
 
   bottle do
-    sha256 "dad62ae38d82394db7ff411217adc5bc356112ce8e0d688389884ce3841f5dcd" => :high_sierra
-    sha256 "d0ad5ed53d328ca6ce27668c3d49bd70c4dd964b9c97a5c27fef6f90e4d36ba6" => :sierra
-    sha256 "4b2ae72a3d10c74f1b8c60cd4d13438dfc3a340740ff32fb07db21bf2f3f3edb" => :el_capitan
+    cellar :any_skip_relocation
+    sha256 "501d83b4a2d6d5e24f1429320909aca6c05787884a6ad690c55d9e6eb719d957" => :mojave
+    sha256 "7df7779bd57aa0c48e7f97e0d617a76591e88dc6d5363b57c187f96f1ac594ab" => :high_sierra
+    sha256 "23f3ddf400ef6ce95436539da360e21e3c89a373ad731cfb15a16ff8c5f3b82a" => :sierra
   end
 
   depends_on "rust" => :build
 
   def install
-    system "cargo", "build", "--release"
-    bin.install "target/release/just"
+    system "cargo", "install", "--root", prefix, "--path", "."
   end
 
   test do

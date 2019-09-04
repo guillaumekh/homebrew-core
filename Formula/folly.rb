@@ -1,49 +1,47 @@
 class Folly < Formula
   desc "Collection of reusable C++ library artifacts developed at Facebook"
   homepage "https://github.com/facebook/folly"
-  url "https://github.com/facebook/folly/archive/v2018.03.26.00.tar.gz"
-  sha256 "ddfb5cb549e5c582b65fbfd217010fb7c955360268d1c1716bec879993730a8b"
+  url "https://github.com/facebook/folly/archive/v2019.08.26.00.tar.gz"
+  sha256 "e8f2416da41dafdc1936147793e397d99e690dabd5098cb6d81415d91493c2e2"
   head "https://github.com/facebook/folly.git"
 
   bottle do
     cellar :any
-    sha256 "0dc0e29ce2b57f6c94095a49692b8840bf5b0b33a764c59dca87fc4824a8fa90" => :high_sierra
-    sha256 "b2051273fe9a135e968f7eb27480af243ff1f3720734c8aadfef330097986a6c" => :sierra
-    sha256 "a2a80c2ca9ead4d2224e04bed42edd291ed29d1283a749ffe4111abab166d121" => :el_capitan
+    sha256 "9b110b7ab03ab5064b47fcde2d72f40a0d653d5058be578d3c23070808fe6abd" => :mojave
+    sha256 "555fba11f6a4352ce7e288f2c2a30c4833adcca38ae46700560b2bb71f24a553" => :high_sierra
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
+  depends_on "cmake" => :build
   depends_on "pkg-config" => :build
-  depends_on "double-conversion"
-  depends_on "glog"
-  depends_on "gflags"
   depends_on "boost"
+  depends_on "double-conversion"
+  depends_on "gflags"
+  depends_on "glog"
   depends_on "libevent"
-  depends_on "xz"
-  depends_on "snappy"
   depends_on "lz4"
+
+  # https://github.com/facebook/folly/issues/966
+  depends_on :macos => :high_sierra
+
   depends_on "openssl"
-
-  # https://github.com/facebook/folly/issues/451
-  depends_on :macos => :el_capitan
-
-  needs :cxx11
-
-  # Known issue upstream. They're working on it:
-  # https://github.com/facebook/folly/pull/445
-  fails_with :gcc => "6"
+  depends_on "snappy"
+  depends_on "xz"
+  depends_on "zstd"
 
   def install
-    ENV.cxx11
+    mkdir "_build" do
+      args = std_cmake_args + %w[
+        -DFOLLY_USE_JEMALLOC=OFF
+      ]
 
-    cd "folly" do
-      system "autoreconf", "-fvi"
-      system "./configure", "--prefix=#{prefix}", "--disable-silent-rules",
-                            "--disable-dependency-tracking"
+      system "cmake", "..", *args, "-DBUILD_SHARED_LIBS=ON"
       system "make"
       system "make", "install"
+
+      system "make", "clean"
+      system "cmake", "..", *args, "-DBUILD_SHARED_LIBS=OFF"
+      system "make"
+      lib.install "libfolly.a", "folly/libfollybenchmark.a"
     end
   end
 
@@ -60,7 +58,7 @@ class Folly < Formula
         return 0;
       }
     EOS
-    system ENV.cxx, "-std=c++11", "test.cc", "-I#{include}", "-L#{lib}",
+    system ENV.cxx, "-std=c++14", "test.cc", "-I#{include}", "-L#{lib}",
                     "-lfolly", "-o", "test"
     system "./test"
   end

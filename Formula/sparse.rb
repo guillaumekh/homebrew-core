@@ -1,23 +1,19 @@
 class Sparse < Formula
   desc "Static C code analysis tool"
   homepage "https://sparse.wiki.kernel.org/"
-  url "https://www.kernel.org/pub/software/devel/sparse/dist/sparse-0.5.0.tar.xz"
-  sha256 "921fcf918c6778d1359f3886ac8cb4cf632faa6242627bc2ae2db75e983488d5"
+  url "https://www.kernel.org/pub/software/devel/sparse/dist/sparse-0.6.0.tar.xz"
+  sha256 "faad3d038e22024280bbd7d6093e9c22dc6333ab7db3638079b93036e43fc277"
   head "https://git.kernel.org/pub/scm/devel/sparse/sparse.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "679d2e51c1f0ee786339d2715bfe85b24f563318b4b2c1a5873606b0aeb12217" => :high_sierra
-    sha256 "bf8ccfa445389a6f69dbb6a58660b2228b58560e8ecc7a8045a07538c3702a88" => :sierra
-    sha256 "78bc3435fd4818f38848fb1b6c57bfb70f540adf527f71390274d0d2a31efbac" => :el_capitan
-    sha256 "be1693a0ec2050625898d960ffd99468d4ce7471785fe1ae6d6f373da2416b11" => :yosemite
-    sha256 "4c33d0589d81abda44fef8904892dc7f6361e96caa82012a71101e9fefe4425c" => :mavericks
-    sha256 "6dac58ce04e796731ea3f0ed3a239cbe6334ab54648f4238baf60d64c1d04437" => :mountain_lion
+    sha256 "a7bb9bba1767d4df2a5c07911fbe5a52e63a89ee61f59ac38b7abdf18f915050" => :mojave
+    sha256 "a2e1769a7a40c5ed66ee727a6b07d7227a7cf5f8bfe1f0acf7af1b4549841ef5" => :high_sierra
+    sha256 "e2e13c56e25ecd0f95558263931d2f4b31b533126e289b95e8ef8f5db4fa1e22" => :sierra
   end
 
   def install
-    inreplace "Makefile", /PREFIX=\$\(HOME\)/, "PREFIX=#{prefix}"
-    system "make", "install"
+    system "make", "install", "PREFIX=#{prefix}"
   end
 
   test do

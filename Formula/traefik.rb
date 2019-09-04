@@ -1,16 +1,16 @@
 class Traefik < Formula
   desc "Modern reverse proxy"
   homepage "https://traefik.io/"
-  url "https://github.com/containous/traefik/releases/download/v1.5.4/traefik-v1.5.4.src.tar.gz"
-  version "1.5.4"
-  sha256 "557e578f4dcc8786f81eb46e537a4be2a71053d220ed26fb5ea3a4265985c370"
+  url "https://github.com/containous/traefik/releases/download/v1.7.14/traefik-v1.7.14.src.tar.gz"
+  version "1.7.14"
+  sha256 "a2454381b4a6720f3190ec720b90a21b82a709b70aa550aff8e502f2cae7c6ea"
   head "https://github.com/containous/traefik.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "a33180715ae28b562b3a3a00baf48a17f3850cfa575bdb8ee743d60b90fbf9fd" => :high_sierra
-    sha256 "6015b747e8042458068cd9745ea87337a7a9d1f84fee9af35fdc2240f0016759" => :sierra
-    sha256 "ce504adf3660e038766ba4f795ce7fbc0dfb992de6b5b0b362340be592e972b7" => :el_capitan
+    sha256 "745aa9c190ae49ee9eceee5868b306b74f05d6ebaf040fe9cd92d007809abdb3" => :mojave
+    sha256 "36400009cd9f4462eb3ec44fc3d42920c2eb4984aaa83f4200bd2033eb4f267f" => :high_sierra
+    sha256 "1ad3204de9e585c5babf576213291c7c4ce5575bb81dd53fe90edadb9d3fbe60" => :sierra
   end
 
   depends_on "go" => :build
@@ -24,6 +24,7 @@ class Traefik < Formula
 
     cd "src/github.com/containous/traefik" do
       cd "webui" do
+        system "yarn", "upgrade"
         system "yarn", "install"
         system "yarn", "run", "build"
       end
@@ -31,6 +32,39 @@ class Traefik < Formula
       system "go", "build", "-o", bin/"traefik", "./cmd/traefik"
       prefix.install_metafiles
     end
+  end
+
+  plist_options :manual => "traefik"
+
+  def plist
+    <<~EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+        <dict>
+          <key>KeepAlive</key>
+          <false/>
+          <key>Label</key>
+          <string>#{plist_name}</string>
+          <key>ProgramArguments</key>
+          <array>
+            <string>#{opt_bin}/traefik</string>
+            <string>--configfile=#{etc/"traefik/traefik.toml"}</string>
+          </array>
+          <key>EnvironmentVariables</key>
+          <dict>
+          </dict>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>WorkingDirectory</key>
+          <string>#{var}</string>
+          <key>StandardErrorPath</key>
+          <string>#{var}/log/traefik.log</string>
+          <key>StandardOutPath</key>
+          <string>#{var}/log/traefik.log</string>
+        </dict>
+      </plist>
+    EOS
   end
 
   test do

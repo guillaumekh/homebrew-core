@@ -1,21 +1,20 @@
 class AdwaitaIconTheme < Formula
   desc "Icons for the GNOME project"
   homepage "https://developer.gnome.org"
-  url "https://download.gnome.org/sources/adwaita-icon-theme/3.28/adwaita-icon-theme-3.28.0.tar.xz"
-  sha256 "7aae8c1dffd6772fd1a21a3d365a0ea28b7c3988bdbbeafbf8742cda68242150"
-  revision 1
+  url "https://download.gnome.org/sources/adwaita-icon-theme/3.32/adwaita-icon-theme-3.32.0.tar.xz"
+  sha256 "698db6e407bb987baec736c6a30216dfc0317e3ca2403c7adf3a5aa46c193286"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "eee6a8e9b781d135bf5b71eb28d5a7e791a11b9a1ba3c0bec5fc273c06ea0b94" => :high_sierra
-    sha256 "eee6a8e9b781d135bf5b71eb28d5a7e791a11b9a1ba3c0bec5fc273c06ea0b94" => :sierra
-    sha256 "eee6a8e9b781d135bf5b71eb28d5a7e791a11b9a1ba3c0bec5fc273c06ea0b94" => :el_capitan
+    sha256 "40bdecea5ba2547c6e1b18c002c55cb36929927bb292a1a0a2b118c1c518492a" => :mojave
+    sha256 "40bdecea5ba2547c6e1b18c002c55cb36929927bb292a1a0a2b118c1c518492a" => :high_sierra
+    sha256 "ad4655cc24902f9b0580cc20b96f7be5f0696ef6c4dfbf59d2c604e997c97dc3" => :sierra
   end
 
-  depends_on "pkg-config" => :build
-  depends_on "intltool" => :build
   depends_on "gettext" => :build
   depends_on "gtk+3" => :build # for gtk3-update-icon-cache
+  depends_on "intltool" => :build
+  depends_on "pkg-config" => :build
   depends_on "librsvg"
 
   def install
@@ -30,7 +29,8 @@ class AdwaitaIconTheme < Formula
     # and that a file created late in the install process exists.
     # Someone who understands GTK+3 could probably write better tests that
     # check if GTK+3 can find the icons.
-    assert_predicate share/"icons/Adwaita/96x96/status/weather-storm-symbolic.symbolic.png", :exist?
+    png = "weather-storm-symbolic.symbolic.png"
+    assert_predicate share/"icons/Adwaita/96x96/status/#{png}", :exist?
     assert_predicate share/"icons/Adwaita/index.theme", :exist?
   end
 end

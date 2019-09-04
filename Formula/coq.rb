@@ -1,30 +1,17 @@
-class Camlp5TransitionalModeRequirement < Requirement
-  fatal true
-
-  satisfy(:build_env => false) { !Tab.for_name("camlp5").with?("strict") }
-
-  def message; <<~EOS
-    camlp5 must be compiled in transitional mode (instead of --strict mode):
-      brew install camlp5
-    EOS
-  end
-end
-
 class Coq < Formula
   desc "Proof assistant for higher-order logic"
   homepage "https://coq.inria.fr/"
-  url "https://github.com/coq/coq/archive/V8.7.2.tar.gz"
-  sha256 "ef25c3979f69b891d40a8776b96059229b06de3d037923de9c657faf8ede78d2"
+  url "https://github.com/coq/coq/archive/V8.9.1.tar.gz"
+  sha256 "87251327e8a1e25c6b08b5c0ae8e7cdf3a91a5f30832bbe74ccc4f0bde9618ea"
   head "https://github.com/coq/coq.git"
 
   bottle do
-    sha256 "322a28d2fd675c87def801f418ea9e864f8a248d3a1b8db75f72b5ae27ccaecb" => :high_sierra
-    sha256 "636e15aa70244d7a667523dffed1510e08f20268dc76d8b88ea17966000906f2" => :sierra
-    sha256 "a94ce424a55a9abac395e56829030707c8cd62fa5a7f136ad8d2202f5d4e6cff" => :el_capitan
+    sha256 "4154be5e0ad0cfd0aedab90e08cd4b10c414463be65a83ebcffa1572ecfdc2f0" => :mojave
+    sha256 "fc27156212ecad4d36cf01e394b767b1d6e94c35618b544a931ecf17ff99e22e" => :high_sierra
+    sha256 "48b6101a91cbefdb0a758e82018ddf404145e8f79f31af31f81512722dee7d36" => :sierra
   end
 
   depends_on "ocaml-findlib" => :build
-  depends_on Camlp5TransitionalModeRequirement
   depends_on "camlp5"
   depends_on "ocaml"
   depends_on "ocaml-num"
@@ -32,7 +19,6 @@ class Coq < Formula
   def install
     system "./configure", "-prefix", prefix,
                           "-mandir", man,
-                          "-emacslib", elisp,
                           "-coqdocdir", "#{pkgshare}/latex",
                           "-coqide", "no",
                           "-with-doc", "no"

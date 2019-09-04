@@ -1,26 +1,25 @@
 class Pilosa < Formula
   desc "Distributed bitmap index that queries across data sets"
   homepage "https://www.pilosa.com"
-  url "https://github.com/pilosa/pilosa/archive/v0.8.8.tar.gz"
-  sha256 "d430cb86f99595e26817fcff1441af815055485ef213a91c54af59181182dfd8"
+  url "https://github.com/pilosa/pilosa/archive/v1.3.1.tar.gz"
+  sha256 "5e0040b7605cae3ebf2b617d472e7c104ad026982ba52e83f8b0593b32b6fa05"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "b53e5982845292ea5a836866bb38356a1ef78b302f26ed687c46355bedfe1178" => :high_sierra
-    sha256 "cffc67a81a17cf30cfd37ad219593703806af37c9c000f8ee183f4fba4c80c80" => :sierra
-    sha256 "b803765ae2cfb19131293a09de26f4b18d3b7033fa7d4f52262b8f297471a2e7" => :el_capitan
+    sha256 "36b8c8e39db4de4e18698e139d709166ef5ff09ef64c0e007f63b31bf11ce14f" => :mojave
+    sha256 "45ed3cc1e4ce0d1d30b4492bf1f997eb21f31c074ef4d59ac46728d0563e23bc" => :high_sierra
+    sha256 "32c6572b34fe9c85b9dfa26da8dd84b26f811b3cd67d9fcf0be64f0cccbc9bb7" => :sierra
   end
 
-  depends_on "dep" => :build
   depends_on "go" => :build
-  depends_on "go-statik" => :build
 
   def install
     ENV["GOPATH"] = buildpath
-    (buildpath/"src/github.com/pilosa/pilosa").install buildpath.children
+    ENV["GO111MODULE"] = "on"
 
+    (buildpath/"src/github.com/pilosa/pilosa").install buildpath.children
     cd "src/github.com/pilosa/pilosa" do
-      system "make", "generate-statik", "pilosa", "FLAGS=-o #{bin}/pilosa", "VERSION=v#{version}"
+      system "make", "build", "FLAGS=-o #{bin}/pilosa", "VERSION=v#{version}"
       prefix.install_metafiles
     end
   end
@@ -50,7 +49,7 @@ class Pilosa < Formula
         <string>#{var}</string>
       </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do
@@ -60,7 +59,6 @@ class Pilosa < Formula
       end
       sleep 0.5
       assert_match("Welcome. Pilosa is running.", shell_output("curl localhost:10101"))
-      assert_match("<!DOCTYPE html>", shell_output("curl --user-agent NotCurl localhost:10101"))
     ensure
       Process.kill "TERM", server
       Process.wait server

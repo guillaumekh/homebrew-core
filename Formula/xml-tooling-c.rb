@@ -1,29 +1,50 @@
 class XmlToolingC < Formula
   desc "Provides a higher level interface to XML processing"
   homepage "https://wiki.shibboleth.net/confluence/display/OpenSAML/XMLTooling-C"
-  url "https://shibboleth.net/downloads/c++-opensaml/2.6.1/xmltooling-1.6.4.tar.gz"
-  sha256 "84c2a458f206465b35a77e6edda202e51246147bd994219e01dfada202ad679a"
+  url "https://shibboleth.net/downloads/c++-opensaml/3.0.1/xmltooling-3.0.4.tar.bz2"
+  sha256 "bb87febe730f97fc58f6f6b6782d7ab89bf240944dd6e5f1c1d9681254bb9a88"
 
   bottle do
-    cellar :any
-    sha256 "1c3be0d73b48e5e47284623bae7f3a8840e2bc0684d0146f550c637f0aca1b6b" => :high_sierra
-    sha256 "7bd073591df0e604d227de6a69883ddfa72b2dee9fa2b44c1ab57fd5b4c24276" => :sierra
-    sha256 "d5d87c12f03e64d62421aff27732605801ba70a50c62b2815f468ce737306d9d" => :el_capitan
+    sha256 "17fb30e25e030285cc3d0b345a05285bd8d8bc64ba5878b3cbdb2302cd64e020" => :mojave
+    sha256 "aaf875d4511b95f8dbba08b818b990e0e6d323048222f4a95189b4333ec7af24" => :high_sierra
+    sha256 "491f5d0c4956b38b3b0c1765b028630f89865cf73a6bf5fd49e459b3b8a77daf" => :sierra
   end
 
   depends_on "pkg-config" => :build
+  depends_on "boost"
   depends_on "log4shib"
+  depends_on "openssl"
   depends_on "xerces-c"
   depends_on "xml-security-c"
-  depends_on "boost"
-  depends_on "openssl"
-  depends_on "curl" => "with-openssl"
 
-  needs :cxx11
+  resource "curl" do
+    url "https://curl.haxx.se/download/curl-7.65.1.tar.bz2"
+    mirror "https://curl.askapache.com/download/curl-7.65.1.tar.bz2"
+    sha256 "cbd36df60c49e461011b4f3064cff1184bdc9969a55e9608bf5cadec4686e3f7"
+  end
 
   def install
-    ENV.O2 # Os breaks the build
     ENV.cxx11
+
+    ENV.prepend_path "PKG_CONFIG_PATH", "#{Formula["openssl"].opt_lib}/pkgconfig"
+
+    resource("curl").stage do
+      system "./configure", "--disable-debug",
+                            "--disable-dependency-tracking",
+                            "--disable-silent-rules",
+                            "--prefix=#{libexec}/curl",
+                            "--with-ssl=#{Formula["openssl"].opt_prefix}",
+                            "--with-ca-bundle=#{etc}/openssl/cert.pem",
+                            "--with-ca-path=#{etc}/openssl/certs",
+                            "--without-libssh2",
+                            "--without-libmetalink",
+                            "--without-gssapi",
+                            "--without-librtmp",
+                            "--disable-ares"
+      system "make", "install"
+    end
+
+    ENV.prepend_path "PKG_CONFIG_PATH", libexec/"curl/lib/pkgconfig"
 
     system "./configure", "--disable-debug",
                           "--disable-dependency-tracking",

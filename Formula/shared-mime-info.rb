@@ -1,25 +1,26 @@
 class SharedMimeInfo < Formula
   desc "Database of common MIME types"
   homepage "https://wiki.freedesktop.org/www/Software/shared-mime-info"
-  url "https://freedesktop.org/~hadess/shared-mime-info-1.9.tar.xz"
-  sha256 "5c0133ec4e228e41bdf52f726d271a2d821499c2ab97afd3aa3d6cf43efcdc83"
+  url "https://gitlab.freedesktop.org/xdg/shared-mime-info/uploads/80c7f1afbcad2769f38aeb9ba6317a51/shared-mime-info-1.12.tar.xz"
+  sha256 "18b2f0fe07ed0d6f81951a5fd5ece44de9c8aeb4dc5bb20d4f595f6cc6bd403e"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "d9874846a89ac41dcc2b95f1c35c4d566ae02ae287b213500c02acd141a9c0bf" => :high_sierra
-    sha256 "a20f07e05094e370bb70ed36eeb1f570a466d8b4b12267659b99bc382cb995cf" => :sierra
-    sha256 "4c81754ed0ea158e77f4f2de100515c4fc4f6f3204e3bf8baf95f8b37f0d7a29" => :el_capitan
+    sha256 "aa8d4c56a94505b37c58935aee01777f87623a4ca9ad9e01276103cce877ce30" => :mojave
+    sha256 "9a1d0b3325e604b5335b1b93f2db1b0c341430188c72523a5aba15dea4b85d1b" => :high_sierra
+    sha256 "08383865a6b8460916bed3239b08e4c683573cd82a7bd0a351067c6f0f9f572a" => :sierra
   end
 
   head do
-    url "https://anongit.freedesktop.org/git/xdg/shared-mime-info.git"
-    depends_on "automake" => :build
+    url "https://gitlab.freedesktop.org/xdg/shared-mime-info.git"
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
     depends_on "intltool" => :build
   end
 
-  depends_on "pkg-config" => :build
   depends_on "intltool" => :build
+  depends_on "pkg-config" => :build
   depends_on "gettext"
   depends_on "glib"
 

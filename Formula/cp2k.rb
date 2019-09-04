@@ -1,14 +1,14 @@
 class Cp2k < Formula
   desc "Quantum chemistry and solid state physics software package"
   homepage "https://www.cp2k.org/"
-  url "https://downloads.sourceforge.net/project/cp2k/cp2k-5.1.tar.bz2"
-  sha256 "e23613b593354fa82e0b8410e17d94c607a0b8c6d9b5d843528403ab09904412"
+  url "https://github.com/cp2k/cp2k/releases/download/v6.1.0/cp2k-6.1.tar.bz2"
+  sha256 "af803558e0a6b9e9d9ce8a3ab955ba32bacd179922455424e061c82c9fefa34b"
   revision 1
 
   bottle do
-    sha256 "85d3a5ad5abc2e16391d30ad91ebe10517652598f17beac62265bd66f67a1eef" => :high_sierra
-    sha256 "9b516e4a0764b18f236a369b8f884d877a4ab08bf4fdfe66a29004f61695116b" => :sierra
-    sha256 "0f1e0c6fd23c666c9b6b253d9c6e035d1e973ea4dd6f65d02211e38be65700c1" => :el_capitan
+    sha256 "f57bdd527461a9c729494afaf3e19b273f49a312793fe4086707895acb50fa7f" => :mojave
+    sha256 "e86f5342c610a9c5c43a2437666b32bffff72c238ed7e2bb0b9bf87a4e13a926" => :high_sierra
+    sha256 "295bc278f7508ceb437e81972d10b30177df05657e3a5945b1eabfc441e05499" => :sierra
   end
 
   depends_on "fftw"
@@ -32,25 +32,22 @@ class Cp2k < Formula
     end
 
     fcflags = %W[
-      -I#{Formula["libxc"].opt_include}
       -I#{Formula["fftw"].opt_include}
       -I#{libexec}/include
     ]
 
     libs = %W[
-      -L#{Formula["libxc"].opt_lib}
-      -lxcf90
-      -lxc
-      -L#{libexec}/lib
-      -lderiv
-      -lint
       -L#{Formula["fftw"].opt_lib}
       -lfftw3
     ]
 
+    ENV["LIBXC_INCLUDE_DIR"] = Formula["libxc"].opt_include
+    ENV["LIBXC_LIB_DIR"] = Formula["libxc"].opt_lib
+    ENV["LIBINT_LIB_DIR"] = libexec/"lib"
+
     # CP2K configuration is done through editing of arch files
     inreplace Dir["arch/Darwin-IntelMacintosh-gfortran.*"].each do |s|
-      s.gsub! /DFLAGS *=/, "DFLAGS = -D__LIBXC -D__FFTW3 -D__LIBINT"
+      s.gsub! /DFLAGS *=/, "DFLAGS = -D__FFTW3"
       s.gsub! /FCFLAGS *=/, "FCFLAGS = #{fcflags.join(" ")}"
       s.gsub! /LIBS *=/, "LIBS = #{libs.join(" ")}"
     end

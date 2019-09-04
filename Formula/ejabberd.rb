@@ -1,28 +1,28 @@
 class Ejabberd < Formula
   desc "XMPP application server"
   homepage "https://www.ejabberd.im"
-  url "https://www.process-one.net/downloads/ejabberd/18.01/ejabberd-18.01.tgz"
-  sha256 "c632b29abbd6db73433a9a4bed77191529867072e204e29a1c49f0472bb22206"
+  url "https://www.process-one.net/downloads/ejabberd/19.05/ejabberd-19.05.tgz"
+  sha256 "f03c672bfd3c151a16615f685d1bd340df1f33d9bd30bc0fd56c0173c4649fd1"
+  revision 1
 
   bottle do
-    sha256 "af7324ea923072867e72ed9cf2f79739e68d45f8fc418c04581befceeac925eb" => :high_sierra
-    sha256 "a5c435eacebfe61d337c97b4dad547408fc74e85bb40a229324cd89ed461a61c" => :sierra
-    sha256 "cce65e1c3034d0a71d18fb112e39f683b46f6782552dbca91c03d3dabc6f7f17" => :el_capitan
+    cellar :any
+    sha256 "ea3f6308213ae4f6cfe575831b61b370106dd13eaed738dabd6c4feb2401bfb7" => :mojave
+    sha256 "d0f7cdb3044fece618d870c6a1c32d35dbed0dd1e38f778bdacdb75f70e0cb6f" => :high_sierra
+    sha256 "3caf4f57d31c2b5d9ccf88339ce2e68bcdf1b383b333591b10055fbff8f062f2" => :sierra
   end
 
   head do
     url "https://github.com/processone/ejabberd.git"
 
-    depends_on "automake" => :build
     depends_on "autoconf" => :build
+    depends_on "automake" => :build
   end
 
-  depends_on "openssl"
   depends_on "erlang"
   depends_on "gd"
   depends_on "libyaml"
-  # for CAPTCHA challenges
-  depends_on "imagemagick" => :optional
+  depends_on "openssl@1.1"
 
   def install
     ENV["TARGET_DIR"] = ENV["DESTDIR"] = "#{lib}/ejabberd/erlang/lib/ejabberd-#{version}"
@@ -39,7 +39,10 @@ class Ejabberd < Formula
 
     system "./autogen.sh" if build.head?
     system "./configure", *args
-    system "make"
+
+    # Set CPP to work around cpp shim issue:
+    # https://github.com/Homebrew/brew/issues/5153
+    system "make", "CPP=clang -E"
 
     ENV.deparallelize
     system "make", "install"
@@ -56,7 +59,7 @@ class Ejabberd < Formula
     If you face nodedown problems, concat your machine name to:
       /private/etc/hosts
     after 'localhost'.
-    EOS
+  EOS
   end
 
   plist_options :manual => "#{HOMEBREW_PREFIX}/sbin/ejabberdctl start"
@@ -84,7 +87,7 @@ class Ejabberd < Formula
       <string>#{var}/lib/ejabberd</string>
     </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do

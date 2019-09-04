@@ -1,26 +1,16 @@
 class Pcl < Formula
   desc "Library for 2D/3D image and point cloud processing"
   homepage "http://www.pointclouds.org/"
-  revision 2
+  url "https://github.com/PointCloudLibrary/pcl/archive/pcl-1.9.1.tar.gz"
+  sha256 "0add34d53cd27f8c468a59b8e931a636ad3174b60581c0387abb98a9fc9cddb6"
+  revision 4
   head "https://github.com/PointCloudLibrary/pcl.git"
 
-  stable do
-    url "https://github.com/PointCloudLibrary/pcl/archive/pcl-1.8.1.tar.gz"
-    sha256 "5a102a2fbe2ba77c775bf92c4a5d2e3d8170be53a68c3a76cfc72434ff7b9783"
-
-    # VTK 8.1 compat
-    # Upstream commit from 10 Nov 2017 "VTK function change since version 7.1 (#2063)"
-    # See https://github.com/PointCloudLibrary/pcl/pull/2063
-    patch do
-      url "https://github.com/PointCloudLibrary/pcl/commit/6555b9a91f.patch?full_index=1"
-      sha256 "860a7b8e7964725b2d11a4237d6a6b65a42f049bc855ecbfcdc406b8e505b478"
-    end
-  end
-
   bottle do
-    sha256 "2e603ca81513fff70a3964036f04996c9db68f80fcdff2cb98cad972cd5bae3d" => :high_sierra
-    sha256 "0b1fc94be3c39437d9bf857becd9a85e18b36966992b388bd4991fcf49d72ad9" => :sierra
-    sha256 "3ce8ccdfbe8a1624a07749b36c53cd274b990bb1ef4a8ce2fb27381eb1dab308" => :el_capitan
+    rebuild 1
+    sha256 "5da061dd836baffd99b01afeec969793d4df2e1f1c7ea764de9317974723de46" => :mojave
+    sha256 "7b9941caff2bd52be9eb15db1ede5f31529a6f77082ad99bcbd49b0b19e08eee" => :high_sierra
+    sha256 "05b133c4e3e03ae77a84fe70bc1fbec2fc91f64516534c521a72e09772c034f2" => :sierra
   end
 
   depends_on "cmake" => :build
@@ -33,6 +23,12 @@ class Pcl < Formula
   depends_on "libusb"
   depends_on "qhull"
   depends_on "vtk"
+
+  # Upstream patch for boost 1.70.0
+  patch do
+    url "https://github.com/PointCloudLibrary/pcl/commit/648932bc.diff?full_index=1"
+    sha256 "23f2cced7786715c59b49a48e4037eb9dea9abee099c4c5c92d95a647636b5ec"
+  end
 
   def install
     args = std_cmake_args + %w[

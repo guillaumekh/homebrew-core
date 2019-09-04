@@ -1,15 +1,15 @@
 class Ncmpcpp < Formula
   desc "Ncurses-based client for the Music Player Daemon"
   homepage "https://rybczak.net/ncmpcpp/"
-  url "https://rybczak.net/ncmpcpp/stable/ncmpcpp-0.8.1.tar.bz2"
-  sha256 "4df9570a1db4ba2dc9b759aab88b283c00806fb5d2bce5f5d27a2eb10e6888ff"
-  revision 1
+  url "https://rybczak.net/ncmpcpp/stable/ncmpcpp-0.8.2.tar.bz2"
+  sha256 "650ba3e8089624b7ad9e4cc19bc1ac6028edb7523cc111fa1686ea44c0921554"
+  revision 6
 
   bottle do
     cellar :any
-    sha256 "36c74f63fa67f4dc84efdcd203d56f0918d35c2d6923de359f127b564c99308f" => :high_sierra
-    sha256 "343c653c3ec11828500c31c6a5cc5aed9eda846b6cc5f74ddac9ad87c71b97a1" => :sierra
-    sha256 "4c05fa5f8db01f70c7392cf6102639abe45a375de0992fe074d3b28f5d37ba47" => :el_capitan
+    sha256 "35e7614c25d5ff48b86fe421ed1360724e09c72b4d3d968b78d3bbb9d905908e" => :mojave
+    sha256 "f3009df8044db97fd94305154cc225dd63ac770ab987b3af072918a284f13014" => :high_sierra
+    sha256 "20bc2c95471f434a9df0d02366ab7a5d31a68a808ec549d44d688f1b5108870e" => :sierra
   end
 
   head do
@@ -20,23 +20,13 @@ class Ncmpcpp < Formula
     depends_on "libtool" => :build
   end
 
-  deprecated_option "outputs" => "with-outputs"
-  deprecated_option "visualizer" => "with-visualizer"
-  deprecated_option "clock" => "with-clock"
-
-  option "with-outputs", "Compile with mpd outputs control"
-  option "with-visualizer", "Compile with built-in visualizer"
-  option "with-clock", "Compile with optional clock tab"
-
   depends_on "pkg-config" => :build
   depends_on "boost"
+  depends_on "fftw"
   depends_on "libmpdclient"
   depends_on "ncurses"
   depends_on "readline"
   depends_on "taglib"
-  depends_on "fftw" if build.with? "visualizer"
-
-  needs :cxx11
 
   def install
     ENV.cxx11
@@ -44,17 +34,16 @@ class Ncmpcpp < Formula
     ENV.append "BOOST_LIB_SUFFIX", "-mt"
     ENV.append "CXXFLAGS", "-D_XOPEN_SOURCE_EXTENDED"
 
-    args = [
-      "--disable-dependency-tracking",
-      "--prefix=#{prefix}",
-      "--with-taglib",
-      "--with-curl",
-      "--enable-unicode",
+    args = %W[
+      --disable-dependency-tracking
+      --prefix=#{prefix}
+      --enable-clock
+      --enable-outputs
+      --enable-unicode
+      --enable-visualizer
+      --with-curl
+      --with-taglib
     ]
-
-    args << "--enable-outputs" if build.with? "outputs"
-    args << "--enable-visualizer" if build.with? "visualizer"
-    args << "--enable-clock" if build.with? "clock"
 
     system "./autogen.sh" if build.head?
     system "./configure", *args

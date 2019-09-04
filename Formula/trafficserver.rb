@@ -1,13 +1,17 @@
 class Trafficserver < Formula
   desc "HTTP/1.1 compliant caching proxy server"
   homepage "https://trafficserver.apache.org/"
-  url "https://www.apache.org/dyn/closer.cgi?path=trafficserver/trafficserver-7.1.2.tar.bz2"
-  sha256 "413e7d5b2aee71c4403a00203d91b99544eecd1e36e47153240d24c0e4dad375"
+  revision 1
+
+  stable do
+    url "https://archive.apache.org/dist/trafficserver/trafficserver-7.1.8.tar.bz2"
+    sha256 "577bd6856612cebfc7c9ab3153a56a331ea6563cb750eb9fec88ac8896d6b60e"
+  end
 
   bottle do
-    sha256 "41b68679946aef5f3eb9f74508630bd6afe08e12982c486aa6a63237100f5fb8" => :high_sierra
-    sha256 "90c793d6859fca79b15582e17146f691717b3d5cae1ec42f1e2577104847fe59" => :sierra
-    sha256 "58d555566068fd8a14263063dd8d5d8eb7d33babe7739b02fdec52911059c2bb" => :el_capitan
+    sha256 "f61f5039f2f95352901da604b2fd084f750d05392fe08361c16f25956dc283c8" => :mojave
+    sha256 "5278c8763c7a11450b32f102ac061c1e0aa139f0cdff2a3514366382f5b1f305" => :high_sierra
+    sha256 "b759425afcd28e4fb7f81e1d6f15319b38830dd5ed7c74ed64c6cc3ee5cbe480" => :sierra
   end
 
   head do
@@ -16,35 +20,34 @@ class Trafficserver < Formula
     depends_on "autoconf" => :build
     depends_on "automake" => :build
     depends_on "libtool"  => :build
+
+    fails_with :clang do
+      build 800
+      cause "needs C++17"
+    end
   end
 
-  option "with-experimental-plugins", "Enable experimental plugins"
-
-  depends_on "openssl"
+  depends_on "openssl@1.1"
   depends_on "pcre"
 
-  needs :cxx11
-
   def install
-    ENV.cxx11
+    ENV.cxx11 if build.stable?
 
-    # Needed for OpenSSL headers
-    if MacOS.version <= :lion
-      ENV.append_to_cflags "-Wno-deprecated-declarations"
-    end
+    # Per https://luajit.org/install.html: If MACOSX_DEPLOYMENT_TARGET
+    # is not set then it's forced to 10.4, which breaks compile on Mojave.
+    ENV["MACOSX_DEPLOYMENT_TARGET"] = MacOS.version
 
     args = %W[
       --prefix=#{prefix}
       --mandir=#{man}
       --localstatedir=#{var}
       --sysconfdir=#{etc}/trafficserver
-      --with-openssl=#{Formula["openssl"].opt_prefix}
+      --with-openssl=#{Formula["openssl@1.1"].opt_prefix}
       --with-tcl=#{MacOS.sdk_path}/System/Library/Frameworks/Tcl.framework
       --with-group=admin
       --disable-silent-rules
+      --enable-experimental-plugins
     ]
-
-    args << "--enable-experimental-plugins" if build.with? "experimental-plugins"
 
     system "autoreconf", "-fvi" if build.head?
     system "./configure", *args

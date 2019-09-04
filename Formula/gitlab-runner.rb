@@ -2,34 +2,18 @@ class GitlabRunner < Formula
   desc "The official GitLab CI runner written in Go"
   homepage "https://gitlab.com/gitlab-org/gitlab-runner"
   url "https://gitlab.com/gitlab-org/gitlab-runner.git",
-      :tag => "v10.6.0",
-      :revision => "a3543a275e3f9555da06041c501429d1f4aeef2d"
+      :tag      => "v12.2.0",
+      :revision => "a987417a77a10898a7c959d52151b77cf5f48fb5"
   head "https://gitlab.com/gitlab-org/gitlab-runner.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "73a3c6d13a7bee928ad371703db38d634c48935fc93ac11077c73cb52ff1b971" => :high_sierra
-    sha256 "7626e6def25dd731875d853fc2a152d32b7b01018c4222e8e9bd971e98454b3c" => :sierra
-    sha256 "3b3eb32196f063a5c4c3b696d6b1d40f1236e6199a722bda7e5d165e7f87b2d9" => :el_capitan
+    sha256 "f3517a32fb53b21b6bba3f2b0295bec40284c648e915779c13dd0ea7fabfe7dc" => :mojave
+    sha256 "9915eba0ffdd811559a85af188042079c9637188452ee086a796b15245193582" => :high_sierra
+    sha256 "5f04ce87f68411b4e868b2444f39b67165c9b3f4175a3efa6f55f82918c20be7" => :sierra
   end
 
   depends_on "go" => :build
-  depends_on "go-bindata" => :build
-  depends_on "docker" => :recommended
-
-  resource "prebuilt-x86_64.tar.xz" do
-    url "https://gitlab-runner-downloads.s3.amazonaws.com/v10.6.0/docker/prebuilt-x86_64.tar.xz",
-        :using => :nounzip
-    version "10.6.0"
-    sha256 "6646621a4c0e81d3a00a85ed1017dc2933d0c79b2dd3c017dcbd666a5f279645"
-  end
-
-  resource "prebuilt-arm.tar.xz" do
-    url "https://gitlab-runner-downloads.s3.amazonaws.com/v10.6.0/docker/prebuilt-arm.tar.xz",
-        :using => :nounzip
-    version "10.6.0"
-    sha256 "492bf09f38af1003c613910b4edd37c5082369ac671be077e009f955d9dbf371"
-  end
 
   def install
     ENV["GOPATH"] = buildpath
@@ -37,14 +21,6 @@ class GitlabRunner < Formula
     dir.install buildpath.children
 
     cd dir do
-      Pathname.pwd.install resource("prebuilt-x86_64.tar.xz"),
-                           resource("prebuilt-arm.tar.xz")
-      system "go-bindata", "-pkg", "docker", "-nocompress", "-nomemcopy",
-                           "-nometadata", "-o",
-                           "#{dir}/executors/docker/bindata.go",
-                           "prebuilt-x86_64.tar.xz",
-                           "prebuilt-arm.tar.xz"
-
       proj = "gitlab.com/gitlab-org/gitlab-runner"
       commit = Utils.popen_read("git", "rev-parse", "--short", "HEAD").chomp
       branch = version.to_s.split(".")[0..1].join("-") + "-stable"
@@ -87,9 +63,14 @@ class GitlabRunner < Formula
           <string>gitlab-runner</string>
           <string>--syslog</string>
         </array>
+        <key>EnvironmentVariables</key>
+          <dict>
+            <key>PATH</key>
+            <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        </dict>
       </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do

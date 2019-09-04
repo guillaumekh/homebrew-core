@@ -1,22 +1,21 @@
 class Pdnsrec < Formula
   desc "Non-authoritative/recursing DNS server"
   homepage "https://www.powerdns.com/recursor.html"
-  url "https://downloads.powerdns.com/releases/pdns-recursor-4.1.1.tar.bz2"
-  sha256 "8feb03c7141997775cb52c131579e8e34c9896ea8bb77276328f5f6cc4e1396b"
+  url "https://downloads.powerdns.com/releases/pdns-recursor-4.2.0.tar.bz2"
+  sha256 "f03c72c1816fdcc645cc539d8c16721d2ec294feac9b5179e78c3db311b7c2c2"
+  revision 1
 
   bottle do
-    sha256 "acf3ac20e35b04e046d21f99f74e8301a14f16e8740ac0ab140d2979a5eb6d09" => :high_sierra
-    sha256 "ca5fca7f5c1f2ac202508bc09c11ceb34928e6f02363723f50c1da8ad985e6a6" => :sierra
-    sha256 "19c92e4a6b850eb8852640da9f10e5f71dbf272d22b17c1e78ad9dbe538c088a" => :el_capitan
+    sha256 "700f8316d4b5770dd7764b2a60220a5c7ec239d044280f2436c97432a71d6327" => :mojave
+    sha256 "a1cf1c5231fcea9c0a48f928e4479c60627d4823557db01b21c8c9c79be68240" => :high_sierra
+    sha256 "531adab0998084f2e66923b2429c5b4c446970d222b6e1b38c71eadcbd5711b3" => :sierra
   end
 
   depends_on "pkg-config" => :build
   depends_on "boost"
-  depends_on "openssl"
+  depends_on "gcc" if DevelopmentTools.clang_build_version == 600
   depends_on "lua"
-  depends_on "gcc" if DevelopmentTools.clang_build_version <= 600
-
-  needs :cxx11
+  depends_on "openssl@1.1"
 
   fails_with :clang do
     build 600
@@ -31,7 +30,7 @@ class Pdnsrec < Formula
       --sysconfdir=#{etc}/powerdns
       --disable-silent-rules
       --with-boost=#{Formula["boost"].opt_prefix}
-      --with-libcrypto=#{Formula["openssl"].opt_prefix}
+      --with-libcrypto=#{Formula["openssl@1.1"].opt_prefix}
       --with-lua
       --without-net-snmp
     ]

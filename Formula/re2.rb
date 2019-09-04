@@ -1,19 +1,17 @@
 class Re2 < Formula
   desc "Alternative to backtracking PCRE-style regular expression engines"
   homepage "https://github.com/google/re2"
-  url "https://github.com/google/re2/archive/2018-03-01.tar.gz"
-  version "20180301"
-  sha256 "51dc7ee9d1a68ee0209672ac4bdff56766c56606dfcdd57aed022015c4784178"
+  url "https://github.com/google/re2/archive/2019-09-01.tar.gz"
+  version "20190901"
+  sha256 "b0382aa7369f373a0148218f2df5a6afd6bfa884ce4da2dfb576b979989e615e"
   head "https://github.com/google/re2.git"
 
   bottle do
     cellar :any
-    sha256 "ab11f1ba1d591a8be5d22a3545dc2238cadbcc1461f8acbc8eda2902d8d2d50e" => :high_sierra
-    sha256 "d8424f64060303197a70e927450e36917493a8bac0326700ab1900b783f0206e" => :sierra
-    sha256 "20b350616911dcd89d6c54b2d4944b8878fa4d9123cf7b95d98a66c16519e702" => :el_capitan
+    sha256 "969e37f92d4a9458c8fa8d1656b32edf010d82b5517dd70459ed9b64b6b03088" => :mojave
+    sha256 "859bd1400bf5fe39361ca00a578758d5f6bc473e408f3139b0e702dc36599868" => :high_sierra
+    sha256 "22b2549722a0b424a46b98494402e327084eea78de40cdf3a5962f7a5d7257f4" => :sierra
   end
-
-  needs :cxx11
 
   def install
     ENV.cxx11

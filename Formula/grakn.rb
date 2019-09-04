@@ -1,8 +1,8 @@
 class Grakn < Formula
   desc "The distributed hyper-relational database for knowledge engineering"
   homepage "https://grakn.ai"
-  url "https://github.com/graknlabs/grakn/releases/download/v1.1.0/grakn-dist-1.1.0.tar.gz"
-  sha256 "6f741bfe04e1ee3b72fd0e107298aec609958ae51c6bfd1040f3aba8b05b4a94"
+  url "https://github.com/graknlabs/grakn/releases/download/1.5.8/grakn-core-all-mac-1.5.8.zip"
+  sha256 "855de96fc8ed33f9366b8448a449c836b9d91d290c802415cea3af76d802516f"
 
   bottle :unneeded
 
@@ -10,7 +10,7 @@ class Grakn < Formula
 
   def install
     libexec.install Dir["*"]
-    bin.install libexec/"grakn", libexec/"graql"
+    bin.install libexec/"grakn"
     bin.env_script_all_files(libexec, Language::Java.java_home_env("1.8"))
   end
 

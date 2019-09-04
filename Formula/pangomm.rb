@@ -1,23 +1,21 @@
 class Pangomm < Formula
   desc "C++ interface to Pango"
-  homepage "http://www.pango.org/"
-  url "https://download.gnome.org/sources/pangomm/2.40/pangomm-2.40.1.tar.xz"
-  sha256 "9762ee2a2d5781be6797448d4dd2383ce14907159b30bc12bf6b08e7227be3af"
+  homepage "https://www.pango.org/"
+  url "https://download.gnome.org/sources/pangomm/2.42/pangomm-2.42.0.tar.xz"
+  sha256 "ca6da067ff93a6445780c0b4b226eb84f484ab104b8391fb744a45cbc7edbf56"
   revision 1
 
   bottle do
     cellar :any
-    sha256 "eefd29c6f25ecaa2d5b6f93a5578eda9607a71283ad7c2613167bb21ad4c62d4" => :high_sierra
-    sha256 "d17ae0b9cdda0fe0145e53c890981aa088880befecc5973818170ca6f2b39c6b" => :sierra
-    sha256 "807631e6f412e16bbc94bf2cdae1d9f4bd61da40d27a741047e907739a73d311" => :el_capitan
+    sha256 "3b1a4952eb3f0d4b5df3d179407b6ad65c9638a6f8da2a916668e51dc9f2581f" => :mojave
+    sha256 "739e5383f7c7c44ec8e8438d0e4741fc573b92dd4a1f41fb8f240034843fe5b2" => :high_sierra
+    sha256 "a140ebd7b3ddb682658ccff2e58a4049f46b4a4b69685810fe55e96e63cffa4b" => :sierra
   end
 
   depends_on "pkg-config" => :build
-  depends_on "glibmm"
   depends_on "cairomm"
+  depends_on "glibmm"
   depends_on "pango"
-
-  needs :cxx11
 
   def install
     ENV.cxx11

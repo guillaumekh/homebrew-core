@@ -1,14 +1,16 @@
 class Openrtsp < Formula
   desc "Command-line RTSP client"
   homepage "http://www.live555.com/openRTSP"
-  url "http://www.live555.com/liveMedia/public/live.2018.02.28.tar.gz"
-  sha256 "2db4f05616bdd21a609baf82c836486c44820c16a006315e02abe2b0b53a247e"
+  url "http://www.live555.com/liveMedia/public/live.2018.10.17.tar.gz"
+  # Keep a mirror as upstream tarballs are removed after each version
+  mirror "https://download.videolan.org/pub/videolan/testing/contrib/live555/live.2018.10.17.tar.gz"
+  sha256 "7c68d9c95b39acd309a2b6a4fc14c3837544a9be3f64062ed38d1ad6f68dc9e8"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "060936774f57ced6f74278d1fe807ac70040f56fd755271dc738cfc868a9059d" => :high_sierra
-    sha256 "1e126de1eed29c831eba0dca9f589d80f59af17c60bc75fecf2ea54b7218c703" => :sierra
-    sha256 "5b913b90d96a394d9ede3a287ffb7ad8b148661369987f632e449e7cf7e8f3ca" => :el_capitan
+    sha256 "fbf8533b65181a93a166ba5415327a4a294576c55effe2c881fbe20956772853" => :mojave
+    sha256 "fbff910d3f518c592e2f64afa540a17d59db664f06ce5077e1ef7959ee1ce481" => :high_sierra
+    sha256 "293bd6edd7d7de1ea39517b1809865f120570e3645acbd777b704c5ebed16189" => :sierra
   end
 
   def install
@@ -22,7 +24,7 @@ class Openrtsp < Formula
   def caveats; <<~EOS
     Testing executables have been placed in:
       #{libexec}
-    EOS
+  EOS
   end
 
   test do

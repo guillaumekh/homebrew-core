@@ -1,54 +1,49 @@
 class Snort < Formula
   desc "Flexible Network Intrusion Detection System"
   homepage "https://www.snort.org"
-  url "https://www.snort.org/downloads/snort/snort-2.9.11.1.tar.gz"
-  sha256 "9f6b3aeac5a109f55504bd370564ac431cb1773507929dc461626898f33f46cd"
+  url "https://www.snort.org/downloads/snort/snort-2.9.12.tar.gz"
+  sha256 "7b02e11987c6cb4f6d79d72799ca9ad2b4bd59cc1d96bb7d6c91549f990d99d0"
 
   bottle do
     cellar :any
-    sha256 "ac8a7b3007b307d8368da7e3879e3c6cd6c718746b9443d544f5e8adcb286be6" => :high_sierra
-    sha256 "b152a9869efd30d40e0d3750a0fd12f825360bf7c1d7cb39156320d32381a649" => :sierra
-    sha256 "00de9088a3e7471026430cf17a7cc7d3d9787496398662c2e2c6a7c766c212cd" => :el_capitan
+    sha256 "2451928b0b98275ecedb347024ea33ed80bb7fca6e67f6f60bd2343159d960d5" => :mojave
+    sha256 "e90378116097477c70bf92381c6fcd5ac122939a1c06c0afaadd797e38fd549f" => :high_sierra
+    sha256 "7143a99771c1482070dc7802da36bc25cc4df7c59c55fd4ad9cb3646e1b60fe2" => :sierra
   end
 
-  option "with-debug", "Compile Snort with debug options enabled"
-
-  deprecated_option "enable-debug" => "with-debug"
-
   depends_on "pkg-config" => :build
-  depends_on "luajit"
   depends_on "daq"
   depends_on "libdnet"
-  depends_on "pcre"
+  depends_on "libpcap"
+  depends_on "luajit"
+  depends_on "nghttp2"
   depends_on "openssl"
+  depends_on "pcre"
 
   def install
     openssl = Formula["openssl"]
+    libpcap = Formula["libpcap"]
 
     args = %W[
       --prefix=#{prefix}
       --sysconfdir=#{etc}/snort
+      --disable-debug
       --disable-dependency-tracking
       --disable-silent-rules
+      --enable-active-response
+      --enable-flexresp3
       --enable-gre
       --enable-mpls
-      --enable-targetbased
+      --enable-normalizer
+      --enable-react
+      --enable-reload
       --enable-sourcefire
+      --enable-targetbased
       --with-openssl-includes=#{openssl.opt_include}
       --with-openssl-libraries=#{openssl.opt_lib}
-      --enable-active-response
-      --enable-normalizer
-      --enable-reload
-      --enable-react
-      --enable-flexresp3
+      --with-libpcap-includes=#{libpcap.opt_include}
+      --with-libpcap-libraries=#{libpcap.opt_lib}
     ]
-
-    if build.with? "debug"
-      args << "--enable-debug"
-      args << "--enable-debug-msgs"
-    else
-      args << "--disable-debug"
-    end
 
     system "./configure", *args
     system "make", "install"
@@ -62,7 +57,7 @@ class Snort < Formula
     so that they can be read by non-root users.  This can be done manually using:
         sudo chmod o+r /dev/bpf*
     or you could create a startup item to do this for you.
-    EOS
+  EOS
   end
 
   test do

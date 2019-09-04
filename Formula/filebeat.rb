@@ -1,22 +1,26 @@
 class Filebeat < Formula
   desc "File harvester to ship log files to Elasticsearch or Logstash"
   homepage "https://www.elastic.co/products/beats/filebeat"
-  url "https://github.com/elastic/beats/archive/v6.2.3.tar.gz"
-  sha256 "4ab58a55e61bd3ad31a597e5b02602b52d306d8ee1e4d4d8ff7662e2b554130e"
+  # Pinned at 6.2.x because of a licencing issue
+  # See: https://github.com/Homebrew/homebrew-core/pull/28995
+  url "https://github.com/elastic/beats/archive/v6.2.4.tar.gz"
+  sha256 "87d863cf55863329ca80e76c3d813af2960492f4834d4fea919f1d4b49aaf699"
   head "https://github.com/elastic/beats.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "a88f922d472232e9e0fbdc69c1b83456addb984bc58694dfcd977c5e2d422224" => :high_sierra
-    sha256 "d442d43bc195cf00200746bc53e04c45d7cf85107b8abb48289aaa7c3afcf54e" => :sierra
-    sha256 "c4df39ac1d5ce0bc16845146418581854af467b0fabee160659f634f8df3e482" => :el_capitan
+    sha256 "5c5f15117647492fb99f28916a00a5999348952e13f097d8c6bc7608df981af5" => :mojave
+    sha256 "6fb82adc6d41dff52ee5407211f14f3d6b8eaf2451dce045e04533f8200a16d5" => :high_sierra
+    sha256 "f8a9672cc5c88dfdb35a46b731f05d34d1b749f5a58f0b70393a854787eebc39" => :sierra
+    sha256 "86e8f72ae2e7404c3e8de74ddd154efbc003b26bb83ca5d28813a38d403b4a45" => :el_capitan
   end
 
   depends_on "go" => :build
+  depends_on "python@2" => :build
 
   resource "virtualenv" do
-    url "https://files.pythonhosted.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz"
-    sha256 "02f8102c2436bb03b3ee6dede1919d1dac8a427541652e5ec95171ec8adbc93a"
+    url "https://files.pythonhosted.org/packages/b1/72/2d70c5a1de409ceb3a27ff2ec007ecdd5cc52239e7c74990e32af57affe9/virtualenv-15.2.0.tar.gz"
+    sha256 "1d7e241b431e7afce47e77f8843a276f652699d1fa4f93b9d8ce0076fd7b0b54"
   end
 
   def install
@@ -95,7 +99,14 @@ class Filebeat < Formula
     (testpath/"log").mkpath
     (testpath/"data").mkpath
 
-    filebeat_pid = fork { exec "#{bin}/filebeat -c #{testpath}/filebeat.yml -path.config #{testpath}/filebeat -path.home=#{testpath} -path.logs #{testpath}/log -path.data #{testpath}" }
+    filebeat_pid = fork do
+      exec "#{bin}/filebeat", "-c", "#{testpath}/filebeat.yml",
+           "-path.config", "#{testpath}/filebeat",
+           "-path.home=#{testpath}",
+           "-path.logs", "#{testpath}/log",
+           "-path.data", testpath
+    end
+
     begin
       sleep 1
       log_file.append_lines "foo bar baz"

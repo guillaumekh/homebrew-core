@@ -1,63 +1,52 @@
 class Pypy < Formula
   desc "Highly performant implementation of Python 2 in Python"
   homepage "https://pypy.org/"
-  revision 1
+  url "https://bitbucket.org/pypy/pypy/downloads/pypy2.7-v7.1.1-src.tar.bz2"
+  sha256 "5f06bede6d71dce8dfbfe797aab26c8e35cb990e16b826914652dc093ad74451"
   head "https://bitbucket.org/pypy/pypy", :using => :hg
-
-  stable do
-    url "https://bitbucket.org/pypy/pypy/downloads/pypy2-v5.10.0-src.tar.bz2"
-    sha256 "1209f2db718e6afda17528baa5138177a14a0938588a7d3e1b7c722c483079a8"
-  end
 
   bottle do
     cellar :any
-    rebuild 1
-    sha256 "40d581a2b3e662160b7b3bd5b2131c2e116f2df791e535832916a8fad7b26bfa" => :high_sierra
-    sha256 "f8908de47b79985e94b07914bb253d8d5351a899e1a6f3226dc5e395f7eb3603" => :sierra
-    sha256 "7e6e949fc271a9a788d85a639c077e07408a2bcebed25b4a128e5ccf82acf0f3" => :el_capitan
+    sha256 "dfb8b553b52f71ecdbc700fa4960df3f61a9f2ae7c7f79a91c873efc8bbcc37c" => :mojave
+    sha256 "1b371dea9a157ac6148f355e4cc12b08290955df38b6a85063a49022f49e70e8" => :high_sierra
+    sha256 "836b5eb5e60478e73d89598ff2fb21d9100f4758d433209b1c9b73d675a3613a" => :sierra
   end
 
-  option "without-bootstrap", "Translate Pypy with system Python instead of " \
-                              "downloading a Pypy binary distribution to " \
-                              "perform the translation (adds 30-60 minutes " \
-                              "to build)"
-
-  depends_on :arch => :x86_64
   depends_on "pkg-config" => :build
-  depends_on "gdbm" => :recommended
-  depends_on "sqlite" => :recommended
+  depends_on :arch => :x86_64
+  depends_on "gdbm"
+  # pypy does not find system libffi, and its location cannot be given
+  # as a build option
+  depends_on "libffi" if DevelopmentTools.clang_build_version >= 1000
   depends_on "openssl"
+  depends_on "sqlite"
 
   resource "bootstrap" do
-    url "https://bitbucket.org/pypy/pypy/downloads/pypy-2.5.0-osx64.tar.bz2"
-    sha256 "30b392b969b54cde281b07f5c10865a7f2e11a229c46b8af384ca1d3fe8d4e6e"
+    url "https://bitbucket.org/pypy/pypy/downloads/pypy2.7-v7.0.0-osx64.tar.bz2"
+    version "7.0.0"
+    sha256 "e7ecb029d9c7a59388838fc4820a50a2f5bee6536010031060e3dfa882730dc8"
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/a4/c8/9a7a47f683d54d83f648d37c3e180317f80dc126a304c45dc6663246233a/setuptools-36.5.0.zip"
-    sha256 "ce2007c1cea3359870b80657d634253a0765b0c7dc5a988d77ba803fc86f2c64"
+    url "https://files.pythonhosted.org/packages/source/s/setuptools/setuptools-41.0.1.zip"
+    sha256 "a222d126f5471598053c9a77f4b5d4f26eaa1f150ad6e01dcf1a42e185d05613"
   end
 
   resource "pip" do
-    url "https://files.pythonhosted.org/packages/c4/44/e6b8056b6c8f2bfd1445cc9990f478930d8e3459e9dbf5b8e2d2922d64d3/pip-9.0.3.tar.gz"
-    sha256 "7bf48f9a693be1d58f49f7af7e0ae9fe29fd671cde8a55e6edca3581c4ef5796"
+    url "https://files.pythonhosted.org/packages/source/p/pip/pip-19.1.1.tar.gz"
+    sha256 "44d3d7d3d30a1eb65c7e5ff1173cdf8f7467850605ac7cc3707b6064bddd0958"
   end
 
-  # https://bugs.launchpad.net/ubuntu/+source/gcc-4.2/+bug/187391
-  fails_with :gcc
-
   def install
+    ENV.append "CFLAGS", "-I#{MacOS.sdk_path}/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"
     # Having PYTHONPATH set can cause the build to fail if another
     # Python is present, e.g. a Homebrew-provided Python 2.x
     # See https://github.com/Homebrew/homebrew/issues/24364
     ENV["PYTHONPATH"] = ""
     ENV["PYPY_USESSION_DIR"] = buildpath
 
-    python = "python"
-    if build.with?("bootstrap") && MacOS.prefer_64_bit?
-      resource("bootstrap").stage buildpath/"bootstrap"
-      python = buildpath/"bootstrap/bin/pypy"
-    end
+    resource("bootstrap").stage buildpath/"bootstrap"
+    python = buildpath/"bootstrap/bin/pypy"
 
     cd "pypy/goal" do
       system python, buildpath/"rpython/bin/rpython",
@@ -68,9 +57,8 @@ class Pypy < Formula
     libexec.mkpath
     cd "pypy/tool/release" do
       package_args = %w[--archive-name pypy --targetdir .]
-      package_args << "--without-gdbm" if build.without? "gdbm"
       system python, "package.py", *package_args
-      system "tar", "-C", libexec.to_s, "--strip-components", "1", "-xzf", "pypy.tar.bz2"
+      system "tar", "-C", libexec.to_s, "--strip-components", "1", "-xf", "pypy.tar.bz2"
     end
 
     (libexec/"lib").install libexec/"bin/libpypy-c.dylib"
@@ -142,7 +130,7 @@ class Pypy < Formula
         pip_pypy install --upgrade pip setuptools
 
     See: https://docs.brew.sh/Homebrew-and-Python
-    EOS
+  EOS
   end
 
   # The HOMEBREW_PREFIX location of site-packages

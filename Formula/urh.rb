@@ -1,61 +1,61 @@
 class Urh < Formula
   desc "Universal Radio Hacker"
   homepage "https://github.com/jopohl/urh"
-  url "https://files.pythonhosted.org/packages/76/14/f5a44ea32d473f9432c05087b5cab4c77882a18da48c2d258474d0fe7c63/urh-2.0.0.tar.gz"
-  sha256 "b52b6d85a2f5af1fc87603365d6572dd1b68f396b281f7059fe32415f8ea03dd"
-  revision 2
+  url "https://files.pythonhosted.org/packages/df/f9/b58b2c73c32ea153926049819bca96c3da85725b915a81d5ae810d649cc4/urh-2.7.3.tar.gz"
+  sha256 "dabb10db83134baf1b31c32d683480db752cecb43bcb35b8bd319870dfb81997"
   head "https://github.com/jopohl/urh.git"
 
   bottle do
-    sha256 "a74135ac416c46a23ec7e1734ebbb9ef21420e4b0a78dc82fec96710a4ca058c" => :high_sierra
-    sha256 "ef6181af8760e1a4216e1e36bc17222459f9cfe60dee1c3a4ef4a6e6a07b13af" => :sierra
-    sha256 "67e8c523afb36c18abf688c3de5c3ee2d2c9a81cfd0c5fcf2993a466c86ab1b0" => :el_capitan
+    sha256 "4ef2733ddee16187ff01b36360f8c12eb8545ff2a94b8d50ffc0878886b5a940" => :mojave
+    sha256 "8fdb578600dd9a5269ec672be31c1117382a835c4d1ec99436279b1a73c34b70" => :high_sierra
+    sha256 "11d835aeb877b1ea197ef0e5fcae5c4bf33bddfd041e4bcdb7178385df474e59" => :sierra
   end
 
-  option "with-hackrf", "Build with libhackrf support"
-
   depends_on "pkg-config" => :build
-
-  depends_on "python"
+  depends_on "hackrf"
+  depends_on "numpy"
   depends_on "pyqt"
+  depends_on "python"
   depends_on "zeromq"
 
-  depends_on "hackrf" => :optional
-
-  resource "numpy" do
-    url "https://files.pythonhosted.org/packages/a3/99/74aa456fc740a7e8f733af4e8302d8e61e123367ec660cd89c53a3cd4d70/numpy-1.14.1.zip"
-    sha256 "fa0944650d5d3fb95869eaacd8eedbd2d83610c85e271bd9d3495ffa9bc4dc9c"
+  resource "Cython" do
+    url "https://files.pythonhosted.org/packages/5b/5b/6cba7123a089c4174f944dd05ea7984c8d908aba8746a99f2340dde8662f/Cython-0.29.12.tar.gz"
+    sha256 "20da832a5e9a8e93d1e1eb64650258956723940968eb585506531719b55b804f"
   end
 
   resource "psutil" do
-    url "https://files.pythonhosted.org/packages/e2/e1/600326635f97fee89bf8426fef14c5c29f4849c79f68fd79f433d8c1bd96/psutil-5.4.3.tar.gz"
-    sha256 "e2467e9312c2fa191687b89ff4bc2ad8843be4af6fb4dc95a7cc5f7d7a327b18"
+    url "https://files.pythonhosted.org/packages/1c/ca/5b8c1fe032a458c2c4bcbe509d1401dca9dda35c7fc46b36bb81c2834740/psutil-5.6.3.tar.gz"
+    sha256 "863a85c1c0a5103a12c05a35e59d336e1d665747e531256e061213e2e90f63f3"
   end
 
   resource "pyzmq" do
-    url "https://files.pythonhosted.org/packages/9f/f6/85a33a25128a4a812c3482547e3d458eebdb19ee0b4699f9199cdb2ad731/pyzmq-17.0.0.tar.gz"
-    sha256 "0145ae59139b41f65e047a3a9ed11bbc36e37d5e96c64382fcdff911c4d8c3f0"
+    url "https://files.pythonhosted.org/packages/a8/5e/7e4ed045fc1fb7667de4975fe8b6ab6b358b16bcc59e8349c9bd092931b6/pyzmq-18.0.2.tar.gz"
+    sha256 "31a11d37ac73107363b47e14c94547dbfc6a550029c3fe0530be443199026fc2"
   end
 
   def install
-    # Workaround for https://github.com/Homebrew/brew/issues/932
-    ENV.delete "PYTHONPATH"
-    # suppress urh warning about needing to recompile the c++ extensions
-    inreplace "src/urh/main.py", "GENERATE_UI = True", "GENERATE_UI = False"
-
     xy = Language::Python.major_minor_version "python3"
     ENV.prepend_create_path "PYTHONPATH", libexec/"vendor/lib/python#{xy}/site-packages"
     resources.each do |r|
+      next if r.name == "Cython"
+
       r.stage do
         system "python3", *Language::Python.setup_install_args(libexec/"vendor")
       end
     end
 
     ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python#{xy}/site-packages"
+    saved_python_path = ENV["PYTHONPATH"]
+    ENV.prepend_create_path "PYTHONPATH", buildpath/"cython/lib/python#{xy}/site-packages"
+
+    resource("Cython").stage do
+      system "python3", *Language::Python.setup_install_args(buildpath/"cython")
+    end
+
     system "python3", *Language::Python.setup_install_args(libexec)
 
     bin.install Dir[libexec/"bin/*"]
-    bin.env_script_all_files(libexec/"bin", :PYTHONPATH => ENV["PYTHONPATH"])
+    bin.env_script_all_files(libexec/"bin", :PYTHONPATH => saved_python_path)
   end
 
   test do
@@ -64,8 +64,8 @@ class Urh < Formula
     (testpath/"test.py").write <<~EOS
       from urh.util.GenericCRC import GenericCRC;
       c = GenericCRC();
-      expected = [1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]
-      assert(expected == c.crc([1, 2, 3]).tolist())
+      expected = [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0]
+      assert(expected == c.crc([0, 1, 0, 1, 1, 0, 1, 0]).tolist())
     EOS
     system "python3", "test.py"
   end

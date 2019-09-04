@@ -1,15 +1,15 @@
 class Mmseqs2 < Formula
-  desc "Software suite for very fast protein sequence search and clustering"
-  homepage "https://mmseqs.org/"
-  url "https://github.com/soedinglab/MMseqs2/archive/2-23394.tar.gz"
-  version "2-23394"
-  sha256 "36763fff4c4de1ab6cfc37508a2ee9bd2f4b840e0c9415bd1214280f67b67072"
+  desc "Software suite for very fast sequence search and clustering"
+  homepage "https://mmseqs.com/"
+  url "https://github.com/soedinglab/MMseqs2/archive/10-6d92c.tar.gz"
+  version "10-6d92c"
+  sha256 "62415e545706adc6e9e6689d34902f405ab5e5c67c8c7562bdd9dd4da2088697"
 
   bottle do
     cellar :any
-    sha256 "7bb4f65a43a6ef0f0aa9cc252e8fe531e2d506d2f9eb9e974f8615b651f6bed6" => :high_sierra
-    sha256 "b512f8115a044f9461a756c45b4820d788ee84b5921c7e76db31be97d84961c4" => :sierra
-    sha256 "6ad606c732041c883472316877d6145fb1958209e16688cbd9bcdf011127e197" => :el_capitan
+    sha256 "813552b3664a81c0ec2e6ef973acc7d1cb5fdacdc02ddaff4787366ef81b7827" => :mojave
+    sha256 "e229477bb366685e7725abb8a7ecfef9d74652266aa2761a7bfdc6b2bc20c39c" => :high_sierra
+    sha256 "3fdb5ce1ace58238f4011df2f1f437fdc25031012b6a2e1a95c158a12b2acc3d" => :sierra
   end
 
   depends_on "cmake" => :build
@@ -21,14 +21,13 @@ class Mmseqs2 < Formula
 
   resource "documentation" do
     url "https://github.com/soedinglab/MMseqs2.wiki.git",
-        :revision => "fda4cf3f63e4c5b01be9d6b66f6666e81cc8ca99"
+        :revision => "03da86a5c553d00c8d4484e9fbd8d68ef14e1169"
   end
 
   def install
     args = *std_cmake_args << "-DHAVE_TESTS=0" << "-DHAVE_MPI=0"
     args << "-DVERSION_OVERRIDE=#{version}"
-
-    args << "-DHAVE_SSE4_1=1" if build.bottle?
+    args << "-DHAVE_SSE4_1=1"
 
     system "cmake", ".", *args
     system "make", "install"
@@ -40,16 +39,15 @@ class Mmseqs2 < Formula
 
   def caveats
     unless Hardware::CPU.sse4?
-      "MMseqs2 requires at least SSE4.1 CPU instruction support. The binary will not work correctly."
+      "MMseqs2 requires at least SSE4.1 CPU instruction support."
     end
   end
 
   test do
     system "#{bin}/mmseqs", "createdb", "#{pkgshare}/examples/QUERY.fasta", "q"
     system "#{bin}/mmseqs", "cluster", "q", "res", "tmp", "-s", "1"
-    assert_predicate testpath/"res", :exist?
-    assert_predicate (testpath/"res").size, :positive?
-    assert_predicate testpath/"res.index", :exist?
-    assert_predicate (testpath/"res.index").size, :positive?
+    system "#{bin}/mmseqs", "createtsv", "q", "q", "res", "res.tsv"
+    assert_predicate testpath/"res.tsv", :exist?
+    assert_predicate (testpath/"res.tsv").size, :positive?
   end
 end

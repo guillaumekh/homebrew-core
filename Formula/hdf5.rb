@@ -1,35 +1,32 @@
 class Hdf5 < Formula
   desc "File format designed to store large amounts of data"
   homepage "https://www.hdfgroup.org/HDF5"
-  url "https://www.hdfgroup.org/package/source-bzip2/?wpdmdl=4300"
-  mirror "https://dl.bintray.com/homebrew/mirror/hdf5-1.10.1"
-  version "1.10.1"
-  sha256 "9c5ce1e33d2463fb1a42dd04daacbc22104e57676e2204e3d66b1ef54b88ebf2"
-  revision 2
+  url "https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.5/src/hdf5-1.10.5.tar.bz2"
+  sha256 "68d6ea8843d2a106ec6a7828564c1689c7a85714a35d8efafa2fee20ca366f44"
+  revision 1
 
   bottle do
-    rebuild 1
-    sha256 "ce60d6ad246ecf8baae4e007a359da7c1cae8c3e199a2f9422f601fb0dc50e03" => :high_sierra
-    sha256 "13fb989ccd1ce01a88be9159d15afd1898e7d358e7f338fec8542cef1204903c" => :sierra
-    sha256 "fffbe4774667aa473e7ab6b004dea0247b98fab63ae7581b70ea129b6092c369" => :el_capitan
+    cellar :any
+    sha256 "28ee1944f9b17a50bddbfbc1730d06373efaf2f188930fa1624370bb895626df" => :mojave
+    sha256 "38fd7f6b101842d2fb103d45f3cbd927b7698795ec622495a9fc6052454eb011" => :high_sierra
+    sha256 "211b460cc14787591fdcc90c4aed3d643b5bab780269a1f2c775adf4d1ed8399" => :sierra
   end
-
-  option "with-mpi", "Enable parallel support"
-
-  deprecated_option "enable-parallel" => "with-mpi"
 
   depends_on "autoconf" => :build
   depends_on "automake" => :build
   depends_on "libtool" => :build
   depends_on "gcc" # for gfortran
-  depends_on "open-mpi" if build.with? "mpi"
   depends_on "szip"
+  uses_from_macos "zlib"
 
   def install
     inreplace %w[c++/src/h5c++.in fortran/src/h5fc.in tools/src/misc/h5cc.in],
-      "${libdir}/libhdf5.settings", "#{pkgshare}/libhdf5.settings"
+      "${libdir}/libhdf5.settings",
+      "#{pkgshare}/libhdf5.settings"
 
-    inreplace "src/Makefile.am", "settingsdir=$(libdir)", "settingsdir=#{pkgshare}"
+    inreplace "src/Makefile.am",
+              "settingsdir=$(libdir)",
+              "settingsdir=#{pkgshare}"
 
     system "autoreconf", "-fiv"
 
@@ -40,21 +37,8 @@ class Hdf5 < Formula
       --with-szlib=#{Formula["szip"].opt_prefix}
       --enable-build-mode=production
       --enable-fortran
+      --enable-cxx
     ]
-
-    if build.without?("mpi")
-      args << "--enable-cxx"
-    else
-      args << "--disable-cxx"
-    end
-
-    if build.with? "mpi"
-      ENV["CC"] = "mpicc"
-      ENV["CXX"] = "mpicxx"
-      ENV["FC"] = "mpif90"
-
-      args << "--enable-parallel"
-    end
 
     system "./configure", *args
     system "make", "install"
@@ -99,7 +83,7 @@ class Hdf5 < Formula
       if (error /= 0) call abort
       write (*,"(I0,'.',I0,'.',I0)") major, minor, rel
       end
-      EOS
+    EOS
     system "#{bin}/h5fc", "test.f90"
     assert_equal version.to_s, shell_output("./a.out").chomp
   end

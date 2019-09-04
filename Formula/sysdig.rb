@@ -1,18 +1,19 @@
 class Sysdig < Formula
   desc "System-level exploration and troubleshooting tool"
   homepage "https://www.sysdig.org/"
-  url "https://github.com/draios/sysdig/archive/0.20.0.tar.gz"
-  sha256 "e1f7e824831a9b902f6df0e818c41bdfc21175398d58318d7892df9c601e7e96"
+  url "https://github.com/draios/sysdig/archive/0.26.2.tar.gz"
+  sha256 "6f4f5b7b187c3774b6c374c1728b3f905ac18a945bde15151dcfb24c79abb441"
 
   bottle do
-    sha256 "e4a6c6d3fdc2e2af66ef4a187dea9a1eef21726efffc6898d1489a1bcc4325b2" => :high_sierra
-    sha256 "f860f82acc1405a29e181582ed1abf6daeb99623e6186dd90e20e20ef7b10cde" => :sierra
-    sha256 "583116ada7e9981e62a776f8aa3aae66ac912e3a5c5b0da1f33da9dad98da520" => :el_capitan
+    sha256 "88ea4aa2330d02ad848eabdfb32579a6571fcebaa9834ee51a1375ca2e5ae244" => :mojave
+    sha256 "22fce688d02c2cc853e6d95eb46fd54bd0b200f33329fea922196f11c15d4d87" => :high_sierra
+    sha256 "05ae33eeda66600860e14490ee51a1b57848915f45aa6714fa42eb202be8927c" => :sierra
   end
 
   depends_on "cmake" => :build
   depends_on "jsoncpp"
   depends_on "luajit"
+  depends_on "tbb"
 
   # More info on https://gist.github.com/juniorz/9986999
   resource "sample_file" do
@@ -21,12 +22,11 @@ class Sysdig < Formula
   end
 
   def install
-    ENV.libcxx if MacOS.version < :mavericks
-
     mkdir "build" do
       system "cmake", "..", "-DSYSDIG_VERSION=#{version}",
                             "-DUSE_BUNDLED_DEPS=OFF",
                             *std_cmake_args
+      system "make"
       system "make", "install"
     end
 

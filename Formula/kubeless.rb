@@ -1,31 +1,28 @@
 class Kubeless < Formula
   desc "Kubernetes Native Serverless Framework"
-  homepage "https://github.com/kubeless/kubeless"
-  url "https://github.com/kubeless/kubeless.git",
-      :tag => "v0.4.0",
-      :revision => "4f4f531f6a1b685bf3842b26cfff5ca7eee533cc"
+  homepage "https://kubeless.io"
+  url "https://github.com/kubeless/kubeless/archive/v1.0.4.tar.gz"
+  sha256 "ea15f7dc388ff7b60b4df25353a405b88662538c0b3f1c771a4c613e5ea46c8c"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "121bc585de3fc20277f9ed7ca084be1204cc5f6c2d64ffe0cd0ff2d4e280e279" => :high_sierra
-    sha256 "100648f5201422b1ce7d6005384e338e03d7899ea4ad273f8fe5c4fe4d51f512" => :sierra
-    sha256 "a6042ea97e4729fd0171c81adf343d5d819832dae1c3cce2a759d1516443b30d" => :el_capitan
+    sha256 "7bc3575e4ffbe397d3cbb7e5dff627765d1007b76e96e0c41dd48b50abaccd20" => :mojave
+    sha256 "caf9f25ec67cee24aa64388124a3fbaebae49340f31f4cd561cdfe79cdeab682" => :high_sierra
+    sha256 "1c83ebb9065891fb249ebc3db222b0066705d0991be0b285181c64a4d9c496b3" => :sierra
   end
 
   depends_on "go" => :build
-  depends_on "kubernetes-cli" => :recommended
+  depends_on "kubernetes-cli"
 
   def install
-    commit = Utils.popen_read("git rev-parse --short HEAD").chomp
     ENV["GOPATH"] = buildpath
     (buildpath/"src/github.com/kubeless/kubeless").install buildpath.children
     cd "src/github.com/kubeless/kubeless" do
       ldflags = %W[
-        -w -X github.com/kubeless/kubeless/cmd/kubeless/version.VERSION=v#{version}
-        -X github.com/kubeless/kubeless/cmd/kubeless/version.GITCOMMIT=#{commit}
+        -w -X github.com/kubeless/kubeless/pkg/version.Version=v#{version}
       ]
-      system "go", "build", "-o", bin/"kubeless", "-ldflags", ldflags.join(" "),
-             "./cmd/kubeless"
+      system "go", "build", "-o", bin/"kubeless", "-ldflags",
+             ldflags.join(" "), "./cmd/kubeless"
       prefix.install_metafiles
     end
   end
@@ -61,6 +58,12 @@ class Kubeless < Formula
             "apiVersion": "kubeless.io/v1beta1",
             "kind": "Function",
             "metadata": { "name": "get-python", "namespace": "default" }
+            }'
+        elsif request_path == "/apis/apiextensions.k8s.io/v1beta1/customresourcedefinitions/functions.kubeless.io"
+          response = '{
+            "apiVersion": "apiextensions.k8s.io/v1beta1",
+            "kind": "CustomResourceDefinition",
+            "metadata": { "name": "functions.kubeless.io" }
             }'
         else
           response = "OK"

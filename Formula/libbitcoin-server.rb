@@ -1,14 +1,14 @@
 class LibbitcoinServer < Formula
   desc "Bitcoin Full Node and Query Server"
   homepage "https://github.com/libbitcoin/libbitcoin-server"
-  url "https://github.com/libbitcoin/libbitcoin-server/archive/v3.5.0.tar.gz"
-  sha256 "37ef8d572fb7400565655501ffdea5d07a1de10f3d9fa823d33e2bf68ef8c3ce"
+  url "https://github.com/libbitcoin/libbitcoin-server/archive/v3.6.0.tar.gz"
+  sha256 "283fa7572fcde70a488c93e8298e57f7f9a8e8403e209ac232549b2c433674e1"
   revision 1
 
   bottle do
-    sha256 "923f0184b88f4f65294dca620a89802a2c6d7019069b23a3635095f67e724c83" => :high_sierra
-    sha256 "d15d06f49c17dae4e06eae578178646816cf3b34a2f96c85f43628d11676bf90" => :sierra
-    sha256 "da9449bb2e23980a881b443136b497f77abde1bace26415678bccd75cbce735b" => :el_capitan
+    sha256 "4c9b616832fa7083b809ef912a5c147a298ed5b1e9cc3dcb6080f881c39ad4f2" => :mojave
+    sha256 "5df6c725d671fcc589104afddd0cc7f20368ed12593a98978193acf3f190410f" => :high_sierra
+    sha256 "07e5cb2e67e3cf0248eeaa6efc17cac7c6bf1ed4639c3c50b24d854321e79f0a" => :sierra
   end
 
   depends_on "autoconf" => :build
@@ -16,24 +16,10 @@ class LibbitcoinServer < Formula
   depends_on "libtool" => :build
   depends_on "pkg-config" => :build
   depends_on "libbitcoin-node"
-  depends_on "zeromq"
-
-  resource "libbitcoin-protocol" do
-    url "https://github.com/libbitcoin/libbitcoin-protocol/archive/v3.5.0.tar.gz"
-    sha256 "9deac6908489e2d59fb9f89c895c49b00e01902d5fdb661f67d4dbe45b22af76"
-  end
+  depends_on "libbitcoin-protocol"
 
   def install
     ENV.prepend_path "PKG_CONFIG_PATH", Formula["libbitcoin"].opt_libexec/"lib/pkgconfig"
-    ENV.prepend_create_path "PKG_CONFIG_PATH", libexec/"lib/pkgconfig"
-
-    resource("libbitcoin-protocol").stage do
-      system "./autogen.sh"
-      system "./configure", "--disable-dependency-tracking",
-                            "--disable-silent-rules",
-                            "--prefix=#{libexec}"
-      system "make", "install"
-    end
 
     system "./autogen.sh"
     system "./configure", "--disable-dependency-tracking",
@@ -53,11 +39,10 @@ class LibbitcoinServer < Formula
           return 0;
       }
     EOS
-    system ENV.cxx, "-std=c++11", "test.cpp",
-                    "-I#{libexec}/include",
-                    "-I#{Formula["libbitcoin-node"].opt_libexec}/include",
-                    "-lbitcoin", "-lbitcoin-server", "-lboost_system",
-                    "-o", "test"
+    system ENV.cxx, "-std=c++11", "test.cpp", "-o", "test",
+                    "-L#{Formula["libbitcoin"].opt_lib}", "-lbitcoin",
+                    "-L#{lib}", "-lbitcoin-server",
+                    "-L#{Formula["boost"].opt_lib}", "-lboost_system"
     system "./test"
   end
 end

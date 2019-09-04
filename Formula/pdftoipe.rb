@@ -1,21 +1,19 @@
 class Pdftoipe < Formula
   desc "Reads arbitrary PDF files and generates an XML file readable by Ipe"
   homepage "https://github.com/otfried/ipe-tools"
-  url "https://github.com/otfried/ipe-tools/archive/v7.2.7.tar.gz"
-  sha256 "889cb31bd8769ba111f541ba795cf53fad474aeeafbc87b7cd37c8a24b2dc6f6"
-  revision 10
+  url "https://github.com/otfried/ipe-tools/archive/v7.2.8.1.tar.gz"
+  sha256 "a6174aae72f93b56c6652c2c27d5203e0f867e11a5e1c7d89c4aa3b4bcb67eb3"
+  revision 6
 
   bottle do
     cellar :any
-    sha256 "7d93074c6563f9bc4911bb8edc2b756af1ee7cd1cc7c437d3585fa9e5e4176d8" => :high_sierra
-    sha256 "a8b9cbceaae3a4e6231152f2b17a5a11f1b5efda2044a2e791a88ed592200159" => :sierra
-    sha256 "7b1c1c9b64e5a350374933c1b9875791c9ab38843167d53e8a15e0554ec19f3a" => :el_capitan
+    sha256 "cfb9b5d496726167cb9fe0837df5921add490392e57d2b9263a6eee1da01ff93" => :mojave
+    sha256 "af435a43bfbb07dce1602f6d10fc2708917be981b9d6bc83ee12c9ddac290e4a" => :high_sierra
+    sha256 "58d3f7c01a1a3f561b35cee63a2c752610b9dea1099ed6e6885d5c7cb4c01416" => :sierra
   end
 
   depends_on "pkg-config" => :build
   depends_on "poppler"
-
-  needs :cxx11
 
   def install
     ENV.cxx11

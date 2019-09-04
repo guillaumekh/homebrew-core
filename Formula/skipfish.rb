@@ -3,19 +3,18 @@ class Skipfish < Formula
   homepage "https://code.google.com/archive/p/skipfish/"
   url "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/skipfish/skipfish-2.10b.tgz"
   sha256 "1a4fbc9d013f1f9b970946ea7228d943266127b7f4100c994ad26c82c5352a9e"
-  revision 1
+  revision 2
 
   bottle do
-    sha256 "cc7acd7bc34e098a19bb6f86744f87f3a7642a7947ba12246fb61ae6f1e6df84" => :high_sierra
-    sha256 "4ce996b74258ec1ccbf1805f61c4d5e58ffc3f2c1cf208e8bacaf6693f5f2a5f" => :sierra
-    sha256 "b897550f5399004d0082a8a5acb0aa7c4f20c92a9033d486c6172da30bd260d3" => :el_capitan
-    sha256 "a055fdc76fae7fc46cf6c2098ac21b7e88bfcc63c29c88e9727f0ecb83a4e99d" => :yosemite
-    sha256 "ed0cf629f0dd2f23782ff21bb728efe019d8bd84605f9ca85a317ef9841b5d8b" => :mavericks
+    rebuild 1
+    sha256 "89109163ad7ff8d82869add5523737ea41704b330f3f4b0ddf9ee3f25ca562dd" => :mojave
+    sha256 "b67e901534789b2e4438b4736dbcb7ca21d25e4aa3210869ff6e84eaca0f4c34" => :high_sierra
+    sha256 "821c75cf8c8455482f47ae910bb867ceaac0546ca5af022efe9705e1d0c9830e" => :sierra
   end
 
   depends_on "libidn"
+  depends_on "openssl" # no OpenSSL 1.1 support
   depends_on "pcre"
-  depends_on "openssl"
 
   def install
     ENV.append "CFLAGS", "-I#{HOMEBREW_PREFIX}/include"
@@ -40,6 +39,6 @@ class Skipfish < Formula
 
     Use this command to print usage information:
       skipfish -h
-    EOS
+  EOS
   end
 end

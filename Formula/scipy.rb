@@ -1,73 +1,69 @@
 class Scipy < Formula
   desc "Software for mathematics, science, and engineering"
   homepage "https://www.scipy.org"
-  url "https://files.pythonhosted.org/packages/bd/f4/3882758754dc083fea6ea66a6e8ceef55e7df173d06a12a074612958800f/scipy-1.0.1.tar.gz"
-  sha256 "8739c67842ed9a1c34c62d6cca6301d0ade40d50ef14ba292bd331f0d6c940ba"
+  url "https://files.pythonhosted.org/packages/cb/97/361c8c6ceb3eb765371a702ea873ff2fe112fa40073e7d2b8199db8eb56e/scipy-1.3.0.tar.gz"
+  sha256 "c3bb4bd2aca82fb498247deeac12265921fe231502a6bc6edea3ee7fe6c40a7a"
+  revision 1
   head "https://github.com/scipy/scipy.git"
 
   bottle do
-    sha256 "05d58e182817e4a0a9a60991e152a71230f3315d07de252ff11bcd2113d239b6" => :high_sierra
-    sha256 "fc4b501664bae60fdb2d360c1dd6a85e64fbf7391f3b753b1e4a6f6c76b157af" => :sierra
-    sha256 "f407e1f9a6b6c2adad30214fe9603a28edc5cf871bd6491683970ca9c14b3c61" => :el_capitan
+    cellar :any
+    sha256 "952cee660434c8d413e10e0c3b35e742389ac5ca4cf5143a85ee9b52f8efbdf5" => :mojave
+    sha256 "d7c2eadab99795a7399357baa46214580287082dda88baf04316b1df0a9d1757" => :high_sierra
+    sha256 "b4451f5eacb2e3e53aa891911dfc0b0069461a9396422b1cdfae13d2444142bb" => :sierra
   end
-
-  option "without-python", "Build without python2 support"
 
   depends_on "swig" => :build
   depends_on "gcc" # for gfortran
   depends_on "numpy"
-  depends_on "python@2" => :recommended if MacOS.version <= :snow_leopard
-  depends_on "python" => :recommended
+  depends_on "openblas"
+  depends_on "python"
 
   cxxstdlib_check :skip
 
-  # https://github.com/Homebrew/homebrew-python/issues/110
-  # There are ongoing problems with gcc+accelerate.
-  fails_with :gcc
-
   def install
+    openblas = Formula["openblas"].opt_prefix
+    ENV["ATLAS"] = "None" # avoid linking against Accelerate.framework
+    ENV["BLAS"] = ENV["LAPACK"] = "#{openblas}/lib/libopenblas.dylib"
+
     config = <<~EOS
       [DEFAULT]
       library_dirs = #{HOMEBREW_PREFIX}/lib
       include_dirs = #{HOMEBREW_PREFIX}/include
+      [openblas]
+      libraries = openblas
+      library_dirs = #{openblas}/lib
+      include_dirs = #{openblas}/include
     EOS
 
     Pathname("site.cfg").write config
 
-    # gfortran is gnu95
-    Language::Python.each_python(build) do |python, version|
-      ENV["PYTHONPATH"] = Formula["numpy"].opt_lib/"python#{version}/site-packages"
-      ENV.prepend_create_path "PYTHONPATH", lib/"python#{version}/site-packages"
-      system python, "setup.py", "build", "--fcompiler=gnu95"
-      system python, *Language::Python.setup_install_args(prefix)
-    end
+    version = Language::Python.major_minor_version "python3"
+    ENV["PYTHONPATH"] = Formula["numpy"].opt_lib/"python#{version}/site-packages"
+    ENV.prepend_create_path "PYTHONPATH", lib/"python#{version}/site-packages"
+    system "python3", "setup.py", "build", "--fcompiler=gnu95"
+    system "python3", *Language::Python.setup_install_args(prefix)
   end
 
   # cleanup leftover .pyc files from previous installs which can cause problems
   # see https://github.com/Homebrew/homebrew-python/issues/185#issuecomment-67534979
   def post_install
-    Language::Python.each_python(build) do |_python, version|
-      rm_f Dir["#{HOMEBREW_PREFIX}/lib/python#{version}/site-packages/scipy/**/*.pyc"]
-    end
+    rm_f Dir["#{HOMEBREW_PREFIX}/lib/python*.*/site-packages/scipy/**/*.pyc"]
   end
 
   def caveats
-    if (build.with? "python@2") && !Formula["python@2"].installed?
-      homebrew_site_packages = Language::Python.homebrew_site_packages
-      user_site_packages = Language::Python.user_site_packages "python"
-      <<~EOS
-        If you use system python (that comes - depending on the OS X version -
-        with older versions of numpy, scipy and matplotlib), you may need to
-        ensure that the brewed packages come earlier in Python's sys.path with:
-          mkdir -p #{user_site_packages}
-          echo 'import sys; sys.path.insert(1, "#{homebrew_site_packages}")' >> #{user_site_packages}/homebrew.pth
-      EOS
-    end
+    homebrew_site_packages = Language::Python.homebrew_site_packages
+    user_site_packages = Language::Python.user_site_packages "python"
+    <<~EOS
+      If you use system python (that comes - depending on the OS X version -
+      with older versions of numpy, scipy and matplotlib), you may need to
+      ensure that the brewed packages come earlier in Python's sys.path with:
+        mkdir -p #{user_site_packages}
+        echo 'import sys; sys.path.insert(1, "#{homebrew_site_packages}")' >> #{user_site_packages}/homebrew.pth
+    EOS
   end
 
   test do
-    Language::Python.each_python(build) do |python, _version|
-      system python, "-c", "import scipy"
-    end
+    system "python3", "-c", "import scipy"
   end
 end

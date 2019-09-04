@@ -1,25 +1,24 @@
 class BoostPython3 < Formula
   desc "C++ library for C++/Python3 interoperability"
   homepage "https://www.boost.org/"
-  url "https://dl.bintray.com/boostorg/release/1.66.0/source/boost_1_66_0.tar.bz2"
-  sha256 "5721818253e6a0989583192f96782c4a98eb6204965316df9f5ad75819225ca9"
+  url "https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.bz2"
+  sha256 "430ae8354789de4fd19ee52f3b1f739e1fba576f0aded0897c3c2bc00fb38778"
   revision 1
   head "https://github.com/boostorg/boost.git"
 
   bottle do
-    sha256 "b5af7b8114b1c86e4a47ab5fb58a50ff4f26e57e43e4b80e334eb26d894580f0" => :high_sierra
-    sha256 "f7817593f0ca621a42420b4f8ea7d2b66bb8c017f30772efce59120df71548b6" => :sierra
-    sha256 "44e03e78576ab81583d82ec0fd2623053a9c12c5fd45e8cd159b19d38583b77d" => :el_capitan
+    cellar :any
+    sha256 "df5614e51cd271c477ac5a614a196180637c22f9c88b38b05c23e28a46db2c25" => :mojave
+    sha256 "fc247eaaa4e2cbe16f3acf5d88485f795fee38872fdcab2bbb0012340c5e4c30" => :high_sierra
+    sha256 "d1ff523535c6e1fafe64007fbe835c1432ac86ab1e5779b12288f9c4d57506b3" => :sierra
   end
 
   depends_on "boost"
   depends_on "python"
 
-  needs :cxx11
-
   resource "numpy" do
-    url "https://files.pythonhosted.org/packages/ee/66/7c2690141c520db08b6a6f852fa768f421b0b50683b7bbcd88ef51f33170/numpy-1.14.0.zip"
-    sha256 "3de643935b212307b420248018323a44ec51987a336d1d747c1322afc3c099fb"
+    url "https://files.pythonhosted.org/packages/2d/80/1809de155bad674b494248bcfca0e49eb4c5d8bee58f26fe7a0dd45029e2/numpy-1.15.4.zip"
+    sha256 "3d734559db35aa3697dadcea492a423118c5c55d176da2f3be9c98d4803fc2a7"
   end
 
   def install
@@ -28,14 +27,16 @@ class BoostPython3 < Formula
             "--libdir=#{lib}",
             "-d2",
             "-j#{ENV.make_jobs}",
-            "--layout=tagged",
+            "--layout=tagged-1.66",
+            # --no-cmake-config should be dropped if possible in next version
+            "--no-cmake-config",
             "--user-config=user-config.jam",
             "threading=multi,single",
             "link=shared,static"]
 
-    # Trunk starts using "clang++ -x c" to select C compiler which breaks C++11
-    # handling using ENV.cxx11. Using "cxxflags" and "linkflags" still works.
-    args << "cxxflags=-std=c++11"
+    # Boost is using "clang++ -x c" to select C compiler which breaks C++14
+    # handling using ENV.cxx14. Using "cxxflags" and "linkflags" still works.
+    args << "cxxflags=-std=c++14"
     if ENV.compiler == :clang
       args << "cxxflags=-stdlib=libc++" << "linkflags=-stdlib=libc++"
     end
@@ -89,8 +90,9 @@ class BoostPython3 < Formula
 
     pyincludes = Utils.popen_read("python3-config --includes").chomp.split(" ")
     pylib = Utils.popen_read("python3-config --ldflags").chomp.split(" ")
+    pyver = Language::Python.major_minor_version("python3").to_s.delete(".")
 
-    system ENV.cxx, "-shared", "hello.cpp", "-L#{lib}", "-lboost_python3", "-o",
+    system ENV.cxx, "-shared", "hello.cpp", "-L#{lib}", "-lboost_python#{pyver}", "-o",
            "hello.so", *pyincludes, *pylib
 
     output = <<~EOS

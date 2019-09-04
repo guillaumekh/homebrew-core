@@ -1,16 +1,15 @@
 class Scw < Formula
   desc "Manage BareMetal Servers from command-line (as easily as with Docker)"
   homepage "https://github.com/scaleway/scaleway-cli"
-  url "https://github.com/scaleway/scaleway-cli/archive/v1.14.tar.gz"
-  sha256 "8d1c0cd9db51ceb18c819ce52d277897622a227b02abd8a566dacc3523dcda2c"
+  url "https://github.com/scaleway/scaleway-cli/archive/v1.19.tar.gz"
+  sha256 "307bb2a67cd8b8a7fb58524dfe3f65bbba476496c051e289e76f11d0508a0ab7"
   head "https://github.com/scaleway/scaleway-cli.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "7bab9dbbedcaf00fad74ee52d3ac7dcdd825d28018a9356a6dfe94392cd06ecf" => :high_sierra
-    sha256 "c2bc2d7b6576719ebed7cd961795e65bea23fc5375b8232643556e9d12b67377" => :sierra
-    sha256 "f72df0768951c24d5f8b53d7e92715205ac3aa207c9ef7731bd3979ac2525be1" => :el_capitan
-    sha256 "460c30f2ea93e5ffe5759ed1e20711f1914e31d3d0e25e741434bdf8de1df904" => :yosemite
+    sha256 "57a21449714df68f713fba876e8c2b4a62de751fd48cd51c15b5109d4a6fb74f" => :mojave
+    sha256 "f292e2359a0f203d78598f08c36c333a7e418bdd2da019dcb12b4a662b1d2e36" => :high_sierra
+    sha256 "585ec2a43d879705288fc165ca77f19d027976da976e38e72874b1273128c790" => :sierra
   end
 
   depends_on "go" => :build
@@ -20,9 +19,11 @@ class Scw < Formula
     ENV["GOBIN"] = buildpath
     (buildpath/"src/github.com/scaleway/scaleway-cli").install Dir["*"]
 
-    system "go", "build", "-o", "#{bin}/scw", "-v", "-ldflags", "-X  github.com/scaleway/scaleway-cli/pkg/scwversion.GITCOMMIT=homebrew", "github.com/scaleway/scaleway-cli/cmd/scw/"
+    system "go", "build", "-o", "#{bin}/scw", "-v", "-ldflags",
+           "-X github.com/scaleway/scaleway-cli/pkg/scwversion.GITCOMMIT=homebrew",
+           "github.com/scaleway/scaleway-cli/cmd/scw/"
 
-    bash_completion.install "src/github.com/scaleway/scaleway-cli/contrib/completion/bash/scw"
+    bash_completion.install "src/github.com/scaleway/scaleway-cli/contrib/completion/bash/scw.bash"
     zsh_completion.install "src/github.com/scaleway/scaleway-cli/contrib/completion/zsh/_scw"
   end
 

@@ -1,20 +1,21 @@
 class GobjectIntrospection < Formula
   desc "Generate introspection data for GObject libraries"
-  homepage "https://live.gnome.org/GObjectIntrospection"
-  url "https://download.gnome.org/sources/gobject-introspection/1.56/gobject-introspection-1.56.0.tar.xz"
-  sha256 "0d7059fad7aa5ec50d9678aea4ea139acab23737e9cf9ca0d86c615cecbaa0f8"
+  homepage "https://wiki.gnome.org/Projects/GObjectIntrospection"
+  url "https://download.gnome.org/sources/gobject-introspection/1.60/gobject-introspection-1.60.2.tar.xz"
+  sha256 "ffdfe2368fb2e34a547898b01aac0520d52d8627fdeb1c306559bcb503ab5e9c"
+  revision 1
 
   bottle do
-    sha256 "bbaedc361807bb187116ca8f5592d01de87407d60d868d097118d2bb635bf76c" => :high_sierra
-    sha256 "b94d571b00bc21c518c9657b224ecf3d6776c5c190e76d7a5dd8bd10a66164d6" => :sierra
-    sha256 "ea7658ae17f9662cdecc3d5251801e027173e17333c7e74570006faf7a6f84e5" => :el_capitan
+    sha256 "aebf18135464982195e0f14d8a5fd76dd03ef91fa45e3648500576228aec97fc" => :mojave
+    sha256 "ab5bff1ce824a2621d7f90296e84499f80275e9370955231ea9de5ff574c2ecf" => :high_sierra
+    sha256 "dcd2ffc04732cd3e60e8f1de914838492d1f37d07d8bb26201fd0c25b634cbc3" => :sierra
   end
 
-  depends_on "pkg-config"
-  depends_on "glib"
   depends_on "cairo"
+  depends_on "glib"
   depends_on "libffi"
-  depends_on "python@2" if MacOS.version <= :mavericks
+  depends_on "pkg-config"
+  depends_on "python"
 
   resource "tutorial" do
     url "https://gist.github.com/7a0023656ccfe309337a.git",
@@ -28,15 +29,9 @@ class GobjectIntrospection < Formula
       s.change_make_var! "GOBJECT_INTROSPECTION_LIBDIR", "#{HOMEBREW_PREFIX}/lib"
     end
 
-    python = if MacOS.version >= :yosemite
-      "/usr/bin/python2.7"
-    else
-      Formula["python@2"].opt_bin/"python2.7"
-    end
-
     system "./configure", "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
-                          "--with-python=#{python}"
+                          "--with-python=#{Formula["python"].opt_bin}/python3"
     system "make"
     system "make", "install"
   end

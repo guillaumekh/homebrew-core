@@ -1,13 +1,15 @@
 class Getdns < Formula
   desc "Modern asynchronous DNS API"
   homepage "https://getdnsapi.net"
-  url "https://getdnsapi.net/releases/getdns-1-4-1/getdns-1.4.1.tar.gz"
-  sha256 "245233dc780f615b6ab1472f2b9cdcd957a451a736f3036717d0da466ab1c51e"
+  url "https://getdnsapi.net/releases/getdns-1-5-2/getdns-1.5.2.tar.gz"
+  sha256 "1826a6a221ea9e9301f2c1f5d25f6f5588e841f08b967645bf50c53b970694c0"
+  revision 2
 
   bottle do
-    sha256 "d80644beb47575554da2473d294956859e8ff96b45f38d0f23a4b49c64d7a1ff" => :high_sierra
-    sha256 "9483906284202975572bdf52a8556de1bf25be69ad36edd703528692a487c342" => :sierra
-    sha256 "5dfc428706294f5f608749170520feb4d6b87bdeb362800e8fea50314a4a2a2c" => :el_capitan
+    cellar :any
+    sha256 "27bea6f7711aa783163a2ffd47c4873c93d672dc1cbdbd7f01b385661d11744d" => :mojave
+    sha256 "766ae31c35d1a5ffef4e9f5d265836cf8fe598faf92e171e060a88e312b4c8da" => :high_sierra
+    sha256 "29d0abb2070668dbeee55839b16556cdd0f65d66d5fe06835a1cbed322811566" => :sierra
   end
 
   head do
@@ -18,12 +20,10 @@ class Getdns < Formula
     depends_on "libtool" => :build
   end
 
+  depends_on "libevent"
+  depends_on "libidn2"
   depends_on "openssl"
-  depends_on "unbound" => :recommended
-  depends_on "libidn" => :recommended
-  depends_on "libevent" => :recommended
-  depends_on "libuv" => :optional
-  depends_on "libev" => :optional
+  depends_on "unbound"
 
   def install
     if build.head?
@@ -31,18 +31,11 @@ class Getdns < Formula
       system "autoreconf", "-fi"
     end
 
-    args = [
-      "--with-ssl=#{Formula["openssl"].opt_prefix}",
-      "--with-trust-anchor=#{etc}/getdns-root.key",
-      "--without-stubby",
-    ]
-    args << "--enable-stub-only" if build.without? "unbound"
-    args << "--without-libidn" if build.without? "libidn"
-    args << "--with-libevent" if build.with? "libevent"
-    args << "--with-libuv" if build.with? "libuv"
-    args << "--with-libev" if build.with? "libev"
-
-    system "./configure", "--prefix=#{prefix}", *args
+    system "./configure", "--prefix=#{prefix}",
+                          "--with-libevent",
+                          "--with-ssl=#{Formula["openssl"].opt_prefix}",
+                          "--with-trust-anchor=#{etc}/getdns-root.key",
+                          "--without-stubby"
     system "make"
     ENV.deparallelize
     system "make", "install"

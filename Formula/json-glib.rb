@@ -1,27 +1,32 @@
 class JsonGlib < Formula
   desc "Library for JSON, based on GLib"
-  homepage "https://live.gnome.org/JsonGlib"
-  url "https://download.gnome.org/sources/json-glib/1.2/json-glib-1.2.8.tar.xz"
-  sha256 "fd55a9037d39e7a10f0db64309f5f0265fa32ec962bf85066087b83a2807f40a"
+  homepage "https://wiki.gnome.org/Projects/JsonGlib"
+  url "https://download.gnome.org/sources/json-glib/1.4/json-glib-1.4.4.tar.xz"
+  sha256 "720c5f4379513dc11fd97dc75336eb0c0d3338c53128044d9fabec4374f4bc47"
   revision 1
 
   bottle do
-    sha256 "0d3c18248dee24bc64f7f17dff22e6effc72b2e1ca27d813b668468944802c05" => :high_sierra
-    sha256 "359c57e2a47a525c066aa39e2ff2a70a076080b2d5f868fc1286bbc5121f82eb" => :sierra
-    sha256 "4eeb1cf4803bdb2bd15d7576591de7c6c316a2fa5f9a958591549f4f4ce79697" => :el_capitan
+    sha256 "223b5472cc71a1eea8efc818d66fa8e6ff05a4aff45d60d4deccba54f82d39dd" => :mojave
+    sha256 "ad30f6f204dd27504d70e9ac22dcfdd482975a5e97879c0b4095527bde68d985" => :high_sierra
+    sha256 "08dbbf2bcef7fdeccfbcd7a0391c4eafa67f914ba0f021c8a41298a6359f7c24" => :sierra
   end
 
   depends_on "gobject-introspection" => :build
+  depends_on "meson-internal" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
   depends_on "glib"
 
+  patch :DATA
+
   def install
-    system "./configure", "--disable-silent-rules",
-                          "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--enable-introspection=yes"
-    system "make"
-    system "make", "install"
+    ENV.refurbish_args
+
+    mkdir "build" do
+      system "meson", "--prefix=#{prefix}", ".."
+      system "ninja"
+      system "ninja", "install"
+    end
   end
 
   test do
@@ -54,3 +59,24 @@ class JsonGlib < Formula
     system "./test"
   end
 end
+
+__END__
+diff --git a/meson.build b/meson.build
+index cee6389..50808cf 100644
+--- a/meson.build
++++ b/meson.build
+@@ -145,14 +145,6 @@ if host_system == 'linux'
+   endforeach
+ endif
+
+-# Maintain compatibility with autotools
+-if host_system == 'darwin'
+-  common_ldflags += [
+-    '-compatibility_version 1',
+-    '-current_version @0@.@1@'.format(json_binary_age - json_interface_age, json_interface_age),
+-  ]
+-endif
+-
+ root_dir = include_directories('.')
+
+ gnome = import('gnome')

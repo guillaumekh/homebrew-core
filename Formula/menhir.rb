@@ -1,13 +1,13 @@
 class Menhir < Formula
   desc "LR(1) parser generator for the OCaml programming language"
   homepage "http://cristal.inria.fr/~fpottier/menhir"
-  url "http://cristal.inria.fr/~fpottier/menhir/menhir-20171222.tar.gz"
-  sha256 "3958ef6d317548c7776a25a13a48855fc1972d660c211ebec7e797b5bec0f47e"
+  url "https://gitlab.inria.fr/fpottier/menhir/-/archive/20190626/menhir-20190626.tar.bz2"
+  sha256 "27639743c1a7ba7cdeed3e8045bc28bf162475d2a99255aaf73da56c3e5fd28d"
 
   bottle do
-    sha256 "1b4f7298c9130c28feb9d7122e1dd08a7e734ce3040a720e1be2006458505670" => :high_sierra
-    sha256 "5d6c6809d1fd545c507ee3bba42f0b3df84f302b2f5ac723a64bdd565923b206" => :sierra
-    sha256 "42d182742c539f018ed9648246529c4afb88712c01786d8de270625aded49f3c" => :el_capitan
+    sha256 "143bf23dead44014da531f0a5a80f79053d38ab9edba73dbf7f7c2daa2657174" => :mojave
+    sha256 "53642937c209fa6216c1bfd72223eb408fcb04bf26a8ac8527ab6c2488373501" => :high_sierra
+    sha256 "e4f4b8fc1a3e7f6b2a38834cf5707add48e1687786ab2eb017d95b67911a037d" => :sierra
   end
 
   depends_on "ocamlbuild" => :build

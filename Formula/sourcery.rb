@@ -1,22 +1,19 @@
 class Sourcery < Formula
   desc "Meta-programming for Swift, stop writing boilerplate code"
   homepage "https://github.com/krzysztofzablocki/Sourcery"
-  url "https://github.com/krzysztofzablocki/Sourcery/archive/0.10.1.tar.gz"
-  sha256 "fa27c1aa820b1df6cfbaac5bfe07985d4202583bbc44f9b4ac6ab474e02f70e6"
+  url "https://github.com/krzysztofzablocki/Sourcery/archive/0.17.0.tar.gz"
+  sha256 "f5a273cf1f6c5591e40505618b8914d8d536b3e345a681b974b58a92920d514d"
   head "https://github.com/krzysztofzablocki/Sourcery.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "03a8adf163c40a29fa4d00acad302f57f8d901a02645b1323abf1d165e1c7679" => :high_sierra
-    sha256 "34f0240218d5e47bb046d3e5bc6c06dd4a16e8ac572c0dfdadd41a2cb0625512" => :sierra
+    sha256 "e8b4ac7bc894f3889c6a8862b9b71344b51f4abaf08704f44a04a62ff95aabff" => :mojave
   end
 
-  depends_on :xcode => "6.0"
-  depends_on :xcode => ["8.3", :build]
+  depends_on :xcode => "10.2"
 
   def install
-    system "swift", "build", "--disable-sandbox", "-c", "release", "-Xswiftc",
-           "-static-stdlib"
+    system "swift", "build", "--disable-sandbox", "-c", "release", "-Xswiftc", "-target", "-Xswiftc", "x86_64-apple-macosx10.11"
     bin.install ".build/release/sourcery"
     lib.install Dir[".build/release/*.dylib"]
   end

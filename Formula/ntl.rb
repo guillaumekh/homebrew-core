@@ -1,14 +1,14 @@
 class Ntl < Formula
   desc "C++ number theory library"
-  homepage "http://www.shoup.net/ntl"
-  url "http://www.shoup.net/ntl/ntl-10.5.0.tar.gz"
-  sha256 "b90b36c9dd8954c9bc54410b1d57c00be956ae1db5a062945822bbd7a86ab4d2"
+  homepage "https://www.shoup.net/ntl"
+  url "https://www.shoup.net/ntl/ntl-11.3.2.tar.gz"
+  sha256 "84ba3145abf8d5f3be6832a14c60b3368eb920719ee96e5774587e71ecd66e9d"
 
   bottle do
     cellar :any
-    sha256 "d3b7cb343a1b590d0e21cbac76ffa40d59dfd59986aa5cd6c8234c7a9797e4be" => :high_sierra
-    sha256 "34e952fe458afc912c0822a3db858b843270dc4b6bea3b73eac52b3b29761d77" => :sierra
-    sha256 "d34ad4f67e21327db85b1007626f77f6e5c87857707b53a3419dce6886418331" => :el_capitan
+    sha256 "5a54ada102a07c107ff8b08f1995230cf977f6770552e16529dbb188f272ee11" => :mojave
+    sha256 "0e55147c25186a9f5f5d22c47855570de07d7d5bd2eb1b9d4b0276b75dd31808" => :high_sierra
+    sha256 "00c8d28ca2045a63753a751beeed1f6f63b198451cbda7b17096d03758cc3589" => :sierra
   end
 
   depends_on "gmp"
@@ -38,6 +38,7 @@ class Ntl < Formula
     EOS
     gmp = Formula["gmp"]
     flags = %W[
+      -std=c++11
       -I#{include}
       -L#{gmp.opt_lib}
       -L#{lib}

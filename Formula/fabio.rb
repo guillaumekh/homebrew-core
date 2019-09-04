@@ -1,25 +1,26 @@
 class Fabio < Formula
   desc "Zero-conf load balancing HTTP(S) router"
   homepage "https://github.com/fabiolb/fabio"
-  url "https://github.com/fabiolb/fabio/archive/v1.5.8.tar.gz"
-  sha256 "3771bb92f5542d48b90b13407cc6c0c1aa9bed2c169daa34921a2aa75c4be22f"
+  url "https://github.com/fabiolb/fabio/archive/v1.5.11.tar.gz"
+  sha256 "628e7382b766f5b03ef72209f38694a723fe5838d044764c9619c3cc84696b67"
   head "https://github.com/fabiolb/fabio.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "e3992e6f1134682772d9b97348927ce1db4474da75945e2aec39a1ce0cc5ed79" => :high_sierra
-    sha256 "e6a469390fbad94d412e9ac1622c28d750aa190b2dec00c0137b061943dde2ad" => :sierra
-    sha256 "f660aaed1a2a7c164238feae3008555873c9b50baec9a9d0613a0c0f3a489a6a" => :el_capitan
+    sha256 "67487a58775ce639924c4cdd51907b23d61d10c23667efca9b9d9e5752b3f363" => :mojave
+    sha256 "aec5deb6a536a861abc132e787336c990a6a5635ab55454171877e2541e3543a" => :high_sierra
+    sha256 "4cd2e56d77e3ea61a8689f69a9b73a5b9184b7224ed56e5c6e0b406de1873dab" => :sierra
   end
 
   depends_on "go" => :build
-  depends_on "consul" => :recommended
+  depends_on "consul"
 
   def install
     mkdir_p buildpath/"src/github.com/fabiolb"
     ln_s buildpath, buildpath/"src/github.com/fabiolb/fabio"
 
     ENV["GOPATH"] = buildpath.to_s
+    ENV["GO111MODULE"] = "off"
 
     system "go", "install", "github.com/fabiolb/fabio"
     bin.install "#{buildpath}/bin/fabio"

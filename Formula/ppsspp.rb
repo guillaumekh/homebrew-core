@@ -2,24 +2,24 @@ class Ppsspp < Formula
   desc "PlayStation Portable emulator"
   homepage "https://ppsspp.org/"
   url "https://github.com/hrydgard/ppsspp.git",
-      :tag => "v1.5.4",
-      :revision => "a1e74d0d4f89ba3fa2d4fe64bac7a0fa16fc146f"
+      :tag      => "v1.8.0",
+      :revision => "e66f019ffaaf7ff4224aa3605ebf59f5654bd0d4"
   head "https://github.com/hrydgard/ppsspp.git"
 
   bottle do
     cellar :any
-    sha256 "91345bf4926f09e945c17fd67001b1c5dd59854cc8e24d31c591569109390d05" => :high_sierra
-    sha256 "2effbc91ee8b7c51fb8b27623d72709842b0c365ae6dd196a07c7c869fdb1801" => :sierra
-    sha256 "b503bc5d9fbcdb6090fbb5c86ddd3d5bbd288e7c8a5121ac23f9b10a0ddc8bf6" => :el_capitan
+    sha256 "44023b7686c2b7d305be47c2ab706891ed41e6d2acc30c0c05e9da452f916631" => :mojave
+    sha256 "b9e7eedbd1db8f9b3dafb13d2081a230ded65d59c232ebec0db36cd9d5bfdc22" => :high_sierra
+    sha256 "35bc11f99dc63d71d24296412b8c90f2e06a2503ca3fea5fc4e3779dc699c571" => :sierra
   end
 
   depends_on "cmake" => :build
   depends_on "pkg-config" => :build
-  depends_on "sdl2"
+  depends_on "ffmpeg"
   depends_on "glew"
   depends_on "libzip"
+  depends_on "sdl2"
   depends_on "snappy"
-  depends_on "ffmpeg"
 
   def install
     args = std_cmake_args

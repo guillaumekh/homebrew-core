@@ -1,38 +1,32 @@
 class Synfig < Formula
   desc "Command-line renderer"
   homepage "https://synfig.org/"
-  url "https://downloads.sourceforge.net/project/synfig/releases/1.0.2/source/synfig-1.0.2.tar.gz"
-  sha256 "34cdf9eac90aadea29fb2997e82da1c32713ab02940f7c8873330f894e167fb4"
-  revision 3
+  url "https://downloads.sourceforge.net/project/synfig/releases/1.2.2/source/synfig-1.2.2.tar.gz"
+  sha256 "5f5f7b33483041165f9a63fe4d95eb815971c7444569e574206f6964e83cc2ef"
+  revision 1
   head "https://svn.code.sf.net/p/synfig/code/"
 
   bottle do
-    sha256 "23bc8a06b80bec0734a32e694b7a56d81d6b089d7e45550e7070fad931adcafe" => :high_sierra
-    sha256 "94545b17928a46d08e22fdfd5959ba46d679284a565dddf2f125bf6bf4849d18" => :sierra
-    sha256 "b13a93ed2c76add7652425530771183eeeefc1bb8d57b7718aa22f32aee3c3e4" => :el_capitan
+    sha256 "272749e10c523b22a622c9274578260758746c02393463183af2d7073ec33680" => :mojave
+    sha256 "67861e53e6149a25b1fc0aa3c576e33bb55de48a0f15fc74fa0f95be92ff94ad" => :high_sierra
+    sha256 "397224ae5e322f167d9ba42e8b8ea21e86db4a7c9ec3a439d8093430a4c1c538" => :sierra
   end
 
+  depends_on "intltool" => :build
   depends_on "pkg-config" => :build
-  depends_on "gettext"
-  depends_on "etl"
-  depends_on "libsigc++"
-  depends_on "libxml++"
-  depends_on "libpng"
-  depends_on "freetype"
-  depends_on "cairo"
-  depends_on "pango"
   depends_on "boost"
-  depends_on "openexr"
-  depends_on "mlt"
+  depends_on "cairo"
+  depends_on "etl"
+  depends_on "fftw"
+  depends_on "freetype"
+  depends_on "gettext"
+  depends_on "libpng"
+  depends_on "libsigc++"
   depends_on "libtool"
-
-  needs :cxx11
-
-  # bug filed upstream as https://synfig.org/issues/thebuggenie/synfig/issues/904
-  patch do
-    url "https://gist.githubusercontent.com/tschoonj/06d5de3cdc5d063f8612/raw/26fe46b6eedeecdc686b9fd5aac01de9f2756424/synfig.diff"
-    sha256 "0ac5b757ba3dda6a863a79e717fc239648c490eac1e643ff275b8ac232a466a3"
-  end
+  depends_on "libxml++"
+  depends_on "mlt"
+  depends_on "openexr"
+  depends_on "pango"
 
   def install
     ENV.cxx11
@@ -40,7 +34,8 @@ class Synfig < Formula
     system "./configure", "--disable-debug",
                           "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
-                          "--with-boost=#{boost.opt_prefix}"
+                          "--with-boost=#{boost.opt_prefix}",
+                          "--without-jpeg"
     system "make", "install"
   end
 

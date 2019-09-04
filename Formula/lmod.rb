@@ -1,16 +1,18 @@
 class Lmod < Formula
   desc "Lua-based environment modules system to modify PATH variable"
   homepage "https://www.tacc.utexas.edu/research-development/tacc-projects/lmod"
-  url "https://github.com/TACC/Lmod/archive/7.7.24.tar.gz"
-  sha256 "d25238c35e467b8b2994f6a150a64550c1d4fa5331c79ae0300da0973adcfc70"
+  url "https://github.com/TACC/Lmod/archive/8.1.13.tar.gz"
+  sha256 "4fccd7d8001f18861f6be60ff1571084d124ba23dd67337e9d31296655649fe4"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "cdfbb026017b4aaa0e90ac3cdf69ead25116ca0ea34d3394a59fbe8f1ea01fbe" => :high_sierra
-    sha256 "2761b871dd07d5160dfe3ca9d663473444f1994a4f544bd535e24557e1ecdbee" => :sierra
-    sha256 "52c7aea5741f2f6c3b97f03230796bbb95eefd612976af32b2359f25b3cfa838" => :el_capitan
+    sha256 "0dcdc42827ed00e8c22eaa50c6f1ef52f849db4bd19d87d7621c9a49c1a50c83" => :mojave
+    sha256 "6b61ad15b5032d1a5143df5866e6817062e3b193797a51d6921157aecd1ab088" => :high_sierra
+    sha256 "f474babda0ac24199ad36690661f65649ed2263e26affa50107e0603ebaa78f4" => :sierra
   end
 
+  depends_on "luarocks" => :build
+  depends_on "pkg-config" => :build
   depends_on "lua"
 
   resource "luafilesystem" do
@@ -42,7 +44,7 @@ class Lmod < Formula
 
   def caveats
     <<~EOS
-      To use LMod, you should add the init script to the shell you are using.
+      To use Lmod, you should add the init script to the shell you are using.
 
       For example, the bash setup script is here: #{opt_prefix}/init/profile
       and you can source it in your bash setup or link to it.

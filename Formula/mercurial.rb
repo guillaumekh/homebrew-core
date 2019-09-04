@@ -3,16 +3,16 @@
 class Mercurial < Formula
   desc "Scalable distributed version control system"
   homepage "https://mercurial-scm.org/"
-  url "https://mercurial-scm.org/release/mercurial-4.5.2.tar.gz"
-  sha256 "a44a9ffd1c9502a4f97298a6bbcb8a79fc8192424c760c67f17b45c12114e390"
+  url "https://www.mercurial-scm.org/release/mercurial-5.1.tar.gz"
+  sha256 "6222d92d860e411e422b7dc58062132bc512fa52ec48a71143b40cab4be7c829"
 
   bottle do
-    sha256 "b0dcf63bb238bdc893e8ba6e38c31792d7bfe9eb6e277975cb931472f5cfb79c" => :high_sierra
-    sha256 "18b16c40efcd60b406210d8fe014359b5163fd11317cdc50584ca81fc435013b" => :sierra
-    sha256 "ce8f7c45d4723b964d688b343c3a9e6b9e680763b062142b6fd6623dd4431233" => :el_capitan
+    sha256 "323cac9485100769e72ed0a2ef140edcef8e4e9b255972f3b215223e59c838ee" => :mojave
+    sha256 "011fcb73b9bbbfab98498e4ab8c5a78df8d6e798daae1d6f0c3f64e805868548" => :high_sierra
+    sha256 "6b20b940236c25882194f64d62f5eb2cc7d1858f7fb01e4d4728577e824520b7" => :sierra
   end
 
-  depends_on "python@2"
+  depends_on "python@2" # does not support Python 3
 
   def install
     ENV.prepend_path "PATH", Formula["python@2"].opt_libexec/"bin"
@@ -45,8 +45,10 @@ class Mercurial < Formula
 
   def caveats
     return unless (opt_bin/"hg").exist?
+
     cacerts_configured = `#{opt_bin}/hg config web.cacerts`.strip
     return if cacerts_configured.empty?
+
     <<~EOS
       Homebrew has detected that Mercurial is configured to use a certificate
       bundle file as its trust store for TLS connections instead of using the

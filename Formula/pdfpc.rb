@@ -1,26 +1,26 @@
 class Pdfpc < Formula
   desc "Presenter console with multi-monitor support for PDF files"
   homepage "https://pdfpc.github.io/"
-  url "https://github.com/pdfpc/pdfpc/archive/v4.1.tar.gz"
-  sha256 "aee684cc4b6cd8f2f83196ebd42608b9917104c9b1572985797daf1ae68e5454"
-  revision 1
+  url "https://github.com/pdfpc/pdfpc/archive/v4.3.4.tar.gz"
+  sha256 "cc3ccd7a23990b76dd6083e774d28f63d726a86db3a7f180b1c90596b735d5ed"
   head "https://github.com/pdfpc/pdfpc.git"
 
   bottle do
-    sha256 "7aeffc37817e9a41a770eb2a20b44db49848e44cd265287a399ebc6fae8ae477" => :high_sierra
-    sha256 "ff74933c0c4931d12504f5e73dd79c103c3b4e47cf34609e4773560e5ff6e7c1" => :sierra
-    sha256 "bd02cc89521cdadfffa97a3cded515b6aad4ace688d71a25c005751b48502fb3" => :el_capitan
+    sha256 "80fa8e226eb146d7d5d04096ad69cbba4e1358f255ccf44333162eaec2ca0976" => :mojave
+    sha256 "79745c4f54d0347251ae9dc09c9eeb3b5c12caffbe45d3da1d581c2002edafab" => :high_sierra
+    sha256 "9142b108ce4ff8c361e293bf7f55efe4c7d0f5015eae64fb3055433d25766427" => :sierra
   end
 
   depends_on "cmake" => :build
   depends_on "vala" => :build
+  depends_on "gst-plugins-good"
   depends_on "gtk+3"
   depends_on "libgee"
   depends_on "librsvg"
   depends_on "poppler"
 
   def install
-    system "cmake", ".", "-DMOVIES=off", *std_cmake_args
+    system "cmake", ".", "-DMOVIES=on", *std_cmake_args
     system "make", "install"
   end
 

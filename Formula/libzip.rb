@@ -1,13 +1,13 @@
 class Libzip < Formula
   desc "C library for reading, creating, and modifying zip archives"
   homepage "https://libzip.org/"
-  url "https://libzip.org/download/libzip-1.5.0.tar.xz"
-  sha256 "5ddb9b41d31b2f99ad4d512003c610ae2db70e222833aba6f9332d5b48a153d9"
+  url "https://libzip.org/download/libzip-1.5.2.tar.gz"
+  sha256 "be694a4abb2ffe5ec02074146757c8b56084dbcebf329123c84b205417435e15"
 
   bottle do
-    sha256 "f0d016f7ca888b27d0880ca2f7786a37a00ced32e245a8e42cc3c16110d40fc7" => :high_sierra
-    sha256 "7eaa32231483a97b9702cbd5a8d7df262bfb2a05a6754602bcff61eb23ac4c98" => :sierra
-    sha256 "db917258649b9a889d1f1f60b712a3a80e16e4785620ae08d2115562425cffdd" => :el_capitan
+    sha256 "0036272939932029e74982ae3757ddb3e2a671ea3328f80fbc6a61036396a8ec" => :mojave
+    sha256 "adede5bd45b75dbbfb5df7ba638688afa3fa7ad71c84b5b238221fb982bed720" => :high_sierra
+    sha256 "58eefd8fef7cdd91803c74c03f55ee161f3b84bdf9785bb693cd901ca5985c43" => :sierra
   end
 
   depends_on "cmake" => :build

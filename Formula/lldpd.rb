@@ -1,38 +1,36 @@
 class Lldpd < Formula
   desc "Implementation of IEEE 802.1ab (LLDP)"
   homepage "https://vincentbernat.github.io/lldpd/"
-  url "https://media.luffy.cx/files/lldpd/lldpd-0.9.9.tar.gz"
-  sha256 "5e9e08f500d21376631cbc9f8e19a4b167cd38eb2d8fd9e660b8e80507f802db"
+  url "https://media.luffy.cx/files/lldpd/lldpd-1.0.4.tar.gz"
+  sha256 "5319bc032fabf1008d5d91e280276aa7f1bbfbb70129d8526cd4526d7c22724f"
+  revision 1
 
   bottle do
-    sha256 "81025c4772690791e2dc89fb7504ee0291b87e70cf756db2b291f2d456e54321" => :high_sierra
-    sha256 "5b841afd2f111884900614bc6e933a197f3bd5b0822699b320482191debce43e" => :sierra
-    sha256 "cc07be2c740f9a9fa8ff493de2956b5443f095517c2eb962af72c6a89066a595" => :el_capitan
+    sha256 "e9a056129cde2e89fafc05704cfdaf0b59b4b4e7a4a84fc342600f47a5a2d540" => :mojave
+    sha256 "a38c7dfd11897bb66d7e7ae648d6037221ca7c8055020bc8ca1b6630fc36e295" => :high_sierra
+    sha256 "7ae0166c4d523d1b8d31792d2b160b47048c0a1096c7246ce652effc97f9df0f" => :sierra
   end
 
-  option "with-snmp", "Build SNMP subagent support"
-
   depends_on "pkg-config" => :build
-  depends_on "readline"
   depends_on "libevent"
-  depends_on "net-snmp" if build.with? "snmp"
+  depends_on "readline"
 
   def install
     readline = Formula["readline"]
-    args = [
-      "--prefix=#{prefix}",
-      "--sysconfdir=#{etc}",
-      "--localstatedir=#{var}",
-      "--with-xml",
-      "--with-readline",
-      "--with-privsep-chroot=/var/empty",
-      "--with-privsep-user=nobody",
-      "--with-privsep-group=nogroup",
-      "--with-launchddaemonsdir=no",
-      "CPPFLAGS=-I#{readline.include} -DRONLY=1",
-      "LDFLAGS=-L#{readline.lib}",
+    args = %W[
+      --prefix=#{prefix}
+      --sysconfdir=#{etc}
+      --localstatedir=#{var}
+      --with-launchddaemonsdir=no
+      --with-privsep-chroot=/var/empty
+      --with-privsep-group=nogroup
+      --with-privsep-user=nobody
+      --with-readline
+      --with-xml
+      --without-snmp
+      CPPFLAGS=-I#{readline.include}\ -DRONLY=1
+      LDFLAGS=-L#{readline.lib}
     ]
-    args << (build.with?("snmp") ? "--with-snmp" : "--without-snmp")
 
     system "./configure", *args
     system "make"
@@ -46,8 +44,6 @@ class Lldpd < Formula
   plist_options :startup => true
 
   def plist
-    additional_args = ""
-    additional_args += "<string>-x</string>" if build.with? "snmp"
     <<~EOS
       <?xml version="1.0" encoding="UTF-8"?>
       <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -58,7 +54,6 @@ class Lldpd < Formula
         <key>ProgramArguments</key>
         <array>
           <string>#{opt_sbin}/lldpd</string>
-          #{additional_args}
         </array>
         <key>RunAtLoad</key><true/>
         <key>KeepAlive</key><true/>

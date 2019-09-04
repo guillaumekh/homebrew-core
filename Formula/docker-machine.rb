@@ -2,19 +2,19 @@ class DockerMachine < Formula
   desc "Create Docker hosts locally and on cloud providers"
   homepage "https://docs.docker.com/machine"
   url "https://github.com/docker/machine.git",
-      :tag => "v0.14.0",
-      :revision => "89b833253d9412716a0291cbdccc94454c33d1b5"
+      :tag      => "v0.16.1",
+      :revision => "cce350d75c529cf6e77328d9dd0477357e04a776"
   head "https://github.com/docker/machine.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "0900893dbf62189c7c67785c96d2040beec0f5276f4848bde3a1d2b170682635" => :high_sierra
-    sha256 "5229f4367948476c5b4c6bb0e5c17c9e6d0e2b2ec2cdc02e14a87e35dc7267ca" => :sierra
-    sha256 "263aa459a2fbd1f660d16049202d3e831dd8da7153c2a0c8cb642f57b94ad1af" => :el_capitan
+    sha256 "a039c02209a33f24fe08eb19a9a1b62050094ffbefac4d14f503256bdd563239" => :mojave
+    sha256 "c96f4ce5a408afabbe1fb7d9ab5fa103a3dffbae5b4f6253a8e328b817a068a2" => :high_sierra
+    sha256 "03243f9afedc25d7e3f519749639bd873bc27ef109e05aa8d86785b196d8dcc4" => :sierra
   end
 
-  depends_on "go" => :build
   depends_on "automake" => :build
+  depends_on "go" => :build
 
   def install
     ENV["GOPATH"] = buildpath

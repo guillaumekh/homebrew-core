@@ -1,20 +1,20 @@
 class Openimageio < Formula
   desc "Library for reading, processing and writing images"
-  homepage "http://openimageio.org/"
-  url "https://github.com/OpenImageIO/oiio/archive/Release-1.8.9.tar.gz"
-  sha256 "6b785abc890a95c600903bd67d6746e14ee363a8bbea23842d2175d4e7a837f3"
+  homepage "https://openimageio.org/"
+  url "https://github.com/OpenImageIO/oiio/archive/Release-2.0.9.tar.gz"
+  sha256 "0cc7f8db831482ada4f7c7f97859eb4db6b0fc3626100f94a89053da1e1a8615"
+  revision 1
   head "https://github.com/OpenImageIO/oiio.git"
 
   bottle do
-    sha256 "ccf5a660b1012e71bb60a5139c5896bb6a84ec98eef46e87a93369b362cdefa1" => :high_sierra
-    sha256 "1b0a5d8fb2c3229be190ce2f14b7aa7da3ff137e4ce744b59f7d2a0151369e00" => :sierra
-    sha256 "58e940b958423499b8c87c0b5ad251f6f8b80c1a8b1a0946628100000f7696e8" => :el_capitan
+    sha256 "fe474b5917f0cd1620dddc3f816f9ff2a255b1c5a4d9b19e99dce392c5c714d8" => :mojave
+    sha256 "c911ecd60f5d7371714f09ff43f87a8569ac87875cf0b95695a4ad8757517171" => :high_sierra
+    sha256 "59c3b922200bd7d24fdb267c36334b47950a7eeb750d4e39efbd6febf00c6891" => :sierra
   end
 
   depends_on "cmake" => :build
   depends_on "pkg-config" => :build
   depends_on "boost"
-  depends_on "boost-python"
   depends_on "boost-python3"
   depends_on "ffmpeg"
   depends_on "freetype"
@@ -30,9 +30,8 @@ class Openimageio < Formula
   depends_on "webp"
 
   def install
-    # -DUSE_OPENSSL=OFF can be removed in 1.9, see
-    # https://github.com/Homebrew/homebrew-core/pull/22522#issuecomment-364831533
     args = std_cmake_args + %w[
+      -DCCACHE_FOUND=
       -DEMBEDPLUGINS=ON
       -DUSE_FIELD3D=OFF
       -DUSE_JPEGTURBO=OFF
@@ -40,15 +39,9 @@ class Openimageio < Formula
       -DUSE_OPENCV=OFF
       -DUSE_OPENGL=OFF
       -DUSE_OPENJPEG=OFF
-      -DUSE_OPENSSL=OFF
       -DUSE_PTEX=OFF
       -DUSE_QT=OFF
     ]
-
-    mkdir "build-with-python2" do
-      system "cmake", "..", *args
-      system "make", "install"
-    end
 
     # CMake picks up the system's python dylib, even if we have a brewed one.
     py3ver = Language::Python.major_minor_version "python3"
@@ -62,15 +55,13 @@ class Openimageio < Formula
 
     # CMake picks up boost-python instead of boost-python3
     args << "-DBOOST_ROOT=#{Formula["boost"].opt_prefix}"
-    args << "-DBoost_PYTHON_LIBRARIES=#{Formula["boost-python3"].opt_lib}/libboost_python3-mt.dylib"
+    args << "-DBoost_PYTHON_LIBRARIES=#{Formula["boost-python3"].opt_lib}/libboost_python#{py3ver.to_s.delete(".")}-mt.dylib"
 
     # This is strange, but must be set to make the hack above work
     args << "-DBoost_PYTHON_LIBRARY_DEBUG=''"
     args << "-DBoost_PYTHON_LIBRARY_RELEASE=''"
 
-    # Need to make a second build dir, otherwise cmake picks up cached files
-    # and builds against `boost-python`
-    mkdir "build-with-python3" do
+    mkdir "build" do
       system "cmake", "..", *args
       system "make", "install"
     end
@@ -81,13 +72,11 @@ class Openimageio < Formula
     assert_match "#{test_image} :    1 x    1, 3 channel, uint8 jpeg",
                  shell_output("#{bin}/oiiotool --info #{test_image} 2>&1")
 
-    ["python", "python3"].each do |python|
-      output = <<~EOS
-        from __future__ import print_function
-        import OpenImageIO
-        print(OpenImageIO.VERSION_STRING)
-      EOS
-      assert_match version.to_s, pipe_output(python, output, 0)
-    end
+    output = <<~EOS
+      from __future__ import print_function
+      import OpenImageIO
+      print(OpenImageIO.VERSION_STRING)
+    EOS
+    assert_match version.to_s, pipe_output("python3", output, 0)
   end
 end

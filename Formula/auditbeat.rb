@@ -1,32 +1,37 @@
 class Auditbeat < Formula
   desc "Lightweight Shipper for Audit Data"
   homepage "https://www.elastic.co/products/beats/auditbeat"
-  url "https://github.com/elastic/beats/archive/v6.2.3.tar.gz"
-  sha256 "4ab58a55e61bd3ad31a597e5b02602b52d306d8ee1e4d4d8ff7662e2b554130e"
+  url "https://github.com/elastic/beats.git",
+      :tag      => "v6.8.2",
+      :revision => "0ffbeab5a52fa93586e4178becf1252e6a837028"
   head "https://github.com/elastic/beats.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "9c9a5ec157b3a71482d3143f50dfe8d9a5ec0d00b9586dcba72635ddac784dbc" => :high_sierra
-    sha256 "5688b7503a2f5be0325e102cf25fb7bcf88401566cb96248fe0cbc15bd8feebe" => :sierra
-    sha256 "e765794dbb54f7a091702c5dad1bb046d3575645d2adb426104f191ead0c1fea" => :el_capitan
+    sha256 "f68fdb18435d7e186815db09c659cba26624b1bbe48bf7170af3b01437698387" => :mojave
+    sha256 "4a557b1777dce96f5a65213807aeb3ffd237039021bb22ef70f1e7aab0f07083" => :high_sierra
+    sha256 "99ef930806428dc372bcda61c53af3cc94d97cd1471a8cff0b67f8ab1184d7b6" => :sierra
   end
 
   depends_on "go" => :build
-
-  # Patch required to build against go 1.10.
-  # May be removed once upstream beats project fully supports go 1.10.
-  patch do
-    url "https://raw.githubusercontent.com/Homebrew/formula-patches/1ddc0e6/auditbeat/go1.10.diff"
-    sha256 "cf0988ba5ff5cc8bd7502671f08ea282b19720be42bea2aaf5c236b29a01a24f"
-  end
+  depends_on "python@2" => :build
 
   resource "virtualenv" do
-    url "https://files.pythonhosted.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz"
-    sha256 "02f8102c2436bb03b3ee6dede1919d1dac8a427541652e5ec95171ec8adbc93a"
+    url "https://files.pythonhosted.org/packages/8b/f4/360aa656ddb0f4168aeaa1057d8784b95d1ce12f34332c1cf52420b6db4e/virtualenv-16.3.0.tar.gz"
+    sha256 "729f0bcab430e4ef137646805b5b1d8efbb43fe53d4a0f33328624a84a5121f7"
+  end
+
+  # Patch required to build against go 1.11 (Can be removed with v7.0.0)
+  # partially backport of https://github.com/elastic/beats/commit/8d8eaf34a6cb5f3b4565bf40ca0dc9681efea93c
+  patch do
+    url "https://raw.githubusercontent.com/Homebrew/formula-patches/a0f8cdc0/auditbeat/go1.11.diff"
+    sha256 "8a00cb0265b6e2de3bc76f14f2ee4f1a5355dad490f3db9288d968b3e95ae0eb"
   end
 
   def install
+    # remove non open source files
+    rm_rf "x-pack"
+
     ENV["GOPATH"] = buildpath
     (buildpath/"src/github.com/elastic/beats").install buildpath.children
 
@@ -36,17 +41,24 @@ class Auditbeat < Formula
       system "python", *Language::Python.setup_install_args(buildpath/"vendor")
     end
 
-    ENV.prepend_path "PATH", buildpath/"vendor/bin"
+    ENV.prepend_path "PATH", buildpath/"vendor/bin" # for virtualenv
+    ENV.prepend_path "PATH", buildpath/"bin" # for mage (build tool)
 
     cd "src/github.com/elastic/beats/auditbeat" do
-      system "make"
+      # don't build docs because it would fail creating the combined OSS/x-pack
+      # docs and we aren't installing them anyway
+      inreplace "magefile.go", "mage.GenerateModuleIncludeListGo, Docs)",
+                               "mage.GenerateModuleIncludeListGo)"
+
+      system "make", "mage"
       # prevent downloading binary wheels during python setup
       system "make", "PIP_INSTALL_COMMANDS=--no-binary :all", "python-env"
-      system "make", "DEV_OS=darwin", "update"
+      system "mage", "-v", "build"
+      system "mage", "-v", "update"
 
       (etc/"auditbeat").install Dir["auditbeat.*", "fields.yml"]
       (libexec/"bin").install "auditbeat"
-      prefix.install "_meta/kibana"
+      prefix.install "build/kibana"
     end
 
     prefix.install_metafiles buildpath/"src/github.com/elastic/beats"

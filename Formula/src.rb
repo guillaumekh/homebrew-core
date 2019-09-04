@@ -1,18 +1,18 @@
 class Src < Formula
   desc "Simple revision control: RCS reloaded with a modern UI"
   homepage "http://www.catb.org/~esr/src/"
-  url "http://www.catb.org/~esr/src/src-1.17.tar.gz"
-  sha256 "1362068b46c035a8d19cafd12e3b23b8251c667bd98242f9c7b05b842f2c089d"
+  url "http://www.catb.org/~esr/src/src-1.26.tar.gz"
+  sha256 "435c457f9f577d84ae1fd763e2bd3548d84f84c50cd2c88f664fba259cd5d71a"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "4a26b02a324638430eb06dccc9ff797cc33d9e5fb0a1313357210a06246a9617" => :high_sierra
-    sha256 "4a26b02a324638430eb06dccc9ff797cc33d9e5fb0a1313357210a06246a9617" => :sierra
-    sha256 "4a26b02a324638430eb06dccc9ff797cc33d9e5fb0a1313357210a06246a9617" => :el_capitan
+    sha256 "302170e0a42b5e3351325edd7781100a383a1f15e72ad2adf00748f6f648867a" => :mojave
+    sha256 "302170e0a42b5e3351325edd7781100a383a1f15e72ad2adf00748f6f648867a" => :high_sierra
+    sha256 "02ff17c0ea729ab844c15fa034b173bae533cd6e3471e2315d163eeee19a8670" => :sierra
   end
 
   head do
-    url "git://thyrsus.com/repositories/src.git"
+    url "https://gitlab.com/esr/src.git"
     depends_on "asciidoc" => :build
   end
 

@@ -1,25 +1,32 @@
 class Gtksourceview3 < Formula
   desc "Text view with syntax, undo/redo, and text marks"
   homepage "https://projects.gnome.org/gtksourceview/"
-  url "https://download.gnome.org/sources/gtksourceview/3.24/gtksourceview-3.24.7.tar.xz"
-  sha256 "a5c20d3a6347533689358f3ea52486409f6dd41d5a69c65eab7570cfaffee8e6"
+  url "https://download.gnome.org/sources/gtksourceview/3.24/gtksourceview-3.24.11.tar.xz"
+  sha256 "691b074a37b2a307f7f48edc5b8c7afa7301709be56378ccf9cc9735909077fd"
   revision 1
 
   bottle do
-    sha256 "48650b0453a3d3d7fc0b5645800a7cb369a159b42ac9624510ca18f1ba88729a" => :high_sierra
-    sha256 "6843a2ce4ac4e93956f36755921fc78a441af35e58a4ba63e4f3c2e716b9d2dd" => :sierra
-    sha256 "32cfcbabfa615c2a9eed607e4cd71ba1ba78b48e098e89b042c339656edad8bf" => :el_capitan
+    rebuild 1
+    sha256 "8ffbd2e84435f093cd1fe71acc542691442d20e599c396f06c1426fd7dc3f8d2" => :mojave
+    sha256 "f601b8985fd07253a8240ace3e33bf9a0fd19f6425fd4ce894ea3ad9829da1cf" => :high_sierra
+    sha256 "312ca326746cae595f806fe9b70bb9e6707c898530391040c92d63d387373abb" => :sierra
   end
 
+  depends_on "autoconf" => :build
+  depends_on "automake" => :build
+  depends_on "gobject-introspection" => :build
+  depends_on "intltool" => :build
+  depends_on "libtool" => :build
   depends_on "pkg-config" => :build
   depends_on "vala" => :build
-  depends_on "intltool" => :build
   depends_on "gettext"
   depends_on "gtk+3"
 
   def install
+    system "autoreconf", "-fi"
     system "./configure", "--disable-dependency-tracking",
                           "--enable-vala=yes",
+                          "--enable-introspection=yes",
                           "--prefix=#{prefix}"
     system "make", "install"
   end
@@ -42,6 +49,7 @@ class Gtksourceview3 < Formula
     gettext = Formula["gettext"]
     glib = Formula["glib"]
     gtkx3 = Formula["gtk+3"]
+    harfbuzz = Formula["harfbuzz"]
     libepoxy = Formula["libepoxy"]
     libpng = Formula["libpng"]
     pango = Formula["pango"]
@@ -57,6 +65,7 @@ class Gtksourceview3 < Formula
       -I#{glib.opt_include}/glib-2.0
       -I#{glib.opt_lib}/glib-2.0/include
       -I#{gtkx3.opt_include}/gtk-3.0
+      -I#{harfbuzz.opt_include}/harfbuzz
       -I#{include}/gtksourceview-3.0
       -I#{libepoxy.opt_include}
       -I#{libpng.opt_include}/libpng16

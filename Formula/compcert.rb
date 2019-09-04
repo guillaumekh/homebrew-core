@@ -1,34 +1,25 @@
 class Compcert < Formula
   desc "Formally verified C compiler"
   homepage "http://compcert.inria.fr"
-  url "https://github.com/AbsInt/CompCert/archive/v3.2.tar.gz"
-  sha256 "23b1a9585e6e9fa211dccae40fc9053c75e7f5519e4b698751bb67a083080487"
+  url "https://github.com/AbsInt/CompCert/archive/v3.5.tar.gz"
+  sha256 "1ea01f9fe9dcfb664dec3b0076bd9ae0d54bb9d79279b5351ab12cc32369b509"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "365f0f9df5be211dd090d112d659fbcc01b0dc145f2ec493e17301aa8c3b471b" => :high_sierra
-    sha256 "af8952aa293ca948c04646eaadbf4acbc1c606686e244b1eff47fca447f7bab8" => :sierra
-    sha256 "3a5d5d6de9c4ca77739dd44776e664f4b551524a285036343aa6d5b39d1b7571" => :el_capitan
+    sha256 "a94adf65e12d17e8d0f51c3fcc1366b60c921eed5440db95fb7265523f6cb724" => :mojave
+    sha256 "ca910a58b799eddcbde7e6533a41467acbdffcb907b8ab8b0746bda1475e1070" => :high_sierra
+    sha256 "40a2d27ae39a8dba01750b97990fee506296cb1a5f45acc3bfaaa2dd3b3baeda" => :sierra
   end
-
-  option "with-config-x86_64", "Build Compcert with ./configure 'x86_64'"
 
   depends_on "coq" => :build
   depends_on "menhir" => :build
   depends_on "ocaml" => :build
 
   def install
-    ENV.permit_arch_flags
-
-    # Compcert's configure script hard-codes gcc. On Lion and under, this
-    # creates problems since Xcode's gcc does not support CFI,
-    # but superenv will trick it into using clang which does. This
-    # causes problems with the compcert compiler at runtime.
-    inreplace "configure", "${toolprefix}gcc", "${toolprefix}#{ENV.cc}"
-
-    args = ["-prefix", prefix]
-    args << (build.with?("config-x86_64") ? "x86_64-macosx" : "ia32-macosx")
-    system "./configure", *args
+    # We pass -ignore-coq-version, otherwise every new version of coq
+    # breaks the strict version check.
+    system "./configure", "-prefix", prefix, "x86_64-macosx",
+                          "-ignore-coq-version"
     system "make", "all"
     system "make", "install"
   end

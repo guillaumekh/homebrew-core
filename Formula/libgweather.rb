@@ -1,35 +1,33 @@
 class Libgweather < Formula
   desc "GNOME library for weather, locations and timezones"
   homepage "https://wiki.gnome.org/Projects/LibGWeather"
-  url "https://download.gnome.org/sources/libgweather/3.26/libgweather-3.26.1.tar.xz"
-  sha256 "fca78470b345bce948e0333cab0a7c52c32562fc4a75de37061248a64e8fc4b8"
-  revision 1
+  url "https://download.gnome.org/sources/libgweather/3.32/libgweather-3.32.2.tar.xz"
+  sha256 "28ed5ff00d6faf1dc885c4252a538e43ff3f614fcf6a0f20c3b63604295d3c02"
 
   bottle do
-    sha256 "63a3844e3327adfa4e90f82d99edfd3e71525721b63ff66f860daff922b70dc8" => :high_sierra
-    sha256 "b668b78d4d5a3f08cc37ff976e4827437bb1b818e1cb1b02838113e65c23bdab" => :sierra
-    sha256 "18ac489c3cf647ef26a0219741908435ed3665ffb0172cca36fb74a50afa6d0d" => :el_capitan
+    rebuild 1
+    sha256 "ca2baee1404a6ed57b383f8e7db30a3996ec30a7d037c51b2ba6c3279b1469fa" => :mojave
+    sha256 "1ca19968b2fa7a1f652a7175f98a2a02c4c0a1f5ef0893cdc4c20940bb973573" => :high_sierra
+    sha256 "2d146f273cdb420e70f45983e1c9ed5aa1f3647ffd991708d94e3bc9e2809fd8" => :sierra
   end
 
   depends_on "gobject-introspection" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
-  depends_on "intltool" => :build
-  depends_on "gtk+3"
+  depends_on "python" => :build
   depends_on "geocode-glib"
+  depends_on "gtk+3"
   depends_on "libsoup"
-  depends_on "vala" => :optional
 
   def install
-    # ensures that the vala files remain within the keg
-    inreplace "libgweather/Makefile.in",
-              "VAPIGEN_VAPIDIR = @VAPIGEN_VAPIDIR@",
-              "VAPIGEN_VAPIDIR = @datadir@/vala/vapi"
+    ENV["DESTDIR"] = "/"
 
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
-                          "--disable-schemas-compile"
-    system "make", "install"
+    mkdir "build" do
+      system "meson", "--prefix=#{prefix}", ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+    end
   end
 
   def post_install
@@ -54,6 +52,7 @@ class Libgweather < Formula
     gettext = Formula["gettext"]
     glib = Formula["glib"]
     gtkx3 = Formula["gtk+3"]
+    harfbuzz = Formula["harfbuzz"]
     libepoxy = Formula["libepoxy"]
     libpng = Formula["libpng"]
     libsoup = Formula["libsoup"]
@@ -70,6 +69,7 @@ class Libgweather < Formula
       -I#{glib.opt_include}/glib-2.0
       -I#{glib.opt_lib}/glib-2.0/include
       -I#{gtkx3.opt_include}/gtk-3.0
+      -I#{harfbuzz.opt_include}/harfbuzz
       -I#{include}/libgweather-3.0
       -I#{libepoxy.opt_include}
       -I#{libpng.opt_include}/libpng16

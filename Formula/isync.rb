@@ -1,14 +1,14 @@
 class Isync < Formula
   desc "Synchronize a maildir with an IMAP server"
   homepage "https://isync.sourceforge.io/"
-  url "https://downloads.sourceforge.net/project/isync/isync/1.3.0/isync-1.3.0.tar.gz"
-  sha256 "8d5f583976e3119705bdba27fa4fc962e807ff5996f24f354957178ffa697c9c"
+  url "https://downloads.sourceforge.net/project/isync/isync/1.3.1/isync-1.3.1.tar.gz"
+  sha256 "68cb4643d58152097f01c9b3abead7d7d4c9563183d72f3c2a31d22bc168f0ea"
 
   bottle do
     cellar :any
-    sha256 "7b7ffd0c838626b698145a205c8325c6c74051c073fc793db724264a5d841dd3" => :high_sierra
-    sha256 "646490217fc6569fd0c8999aac9e3b7dfd4ae18aaa20cd0c0b99f0dfd350b4de" => :sierra
-    sha256 "060669b949a1d59d8d2432d8c169c4b6af457bde209e670bd0056f4efe9ef0d9" => :el_capitan
+    sha256 "5a60a0829dd79fca912b684cdf4994559e064253f64021e5d9bc40a1aaf1d3c5" => :mojave
+    sha256 "5c8d8dd87e072f15decb68c491f50c18450e3d7e8a55211a443b0f22126de115" => :high_sierra
+    sha256 "e07239359fe1f1f6b62a1c86d4f38b56e0715195b1e881a292903be17895bf6d" => :sierra
   end
 
   head do
@@ -18,8 +18,8 @@ class Isync < Formula
     depends_on "automake" => :build
   end
 
+  depends_on "berkeley-db"
   depends_on "openssl"
-  depends_on "berkeley-db" => :optional
 
   def install
     system "./autogen.sh" if build.head?
@@ -29,7 +29,6 @@ class Isync < Formula
       --prefix=#{prefix}
       --disable-silent-rules
     ]
-    args << "ac_cv_berkdb4=no" if build.without? "berkeley-db"
 
     system "./configure", *args
     system "make", "install"
@@ -54,7 +53,7 @@ class Isync < Formula
         <key>ProgramArguments</key>
         <array>
           <string>#{opt_bin}/mbsync</string>
-          <string>Periodic</string>
+          <string>-a</string>
         </array>
         <key>StartInterval</key>
         <integer>300</integer>
@@ -66,7 +65,7 @@ class Isync < Formula
         <string>/dev/null</string>
       </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do

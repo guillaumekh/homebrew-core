@@ -1,8 +1,8 @@
 class Jena < Formula
   desc "Framework for building semantic web and linked data apps"
   homepage "https://jena.apache.org/"
-  url "https://archive.apache.org/dist/jena/binaries/apache-jena-3.6.0.tar.gz"
-  sha256 "a76415af2c70d74110accc473443bd2a18f66a7392a97f3367fdd0efe530e314"
+  url "https://archive.apache.org/dist/jena/binaries/apache-jena-3.11.0.tar.gz"
+  sha256 "65916308002d02a3e83f8b1a019d9b02068be5503ca906bdddb61b6c1095e7b5"
 
   bottle :unneeded
 

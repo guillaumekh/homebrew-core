@@ -1,17 +1,17 @@
 class Lbdb < Formula
   desc "Little brother's database for the mutt mail reader"
   homepage "https://www.spinnaker.de/lbdb/"
-  url "https://www.spinnaker.de/lbdb/download/lbdb_0.46.tar.gz"
-  sha256 "b13f23fd71c1f059a27db65a37c77daa9751e66354e017637663a234bb00dd99"
+  url "https://www.spinnaker.de/lbdb/download/lbdb_0.48.1.tar.gz"
+  sha256 "b0cbc68abeb70be779b234f736dd7eb14bf3f7cd1a2ea41e636de1949da025bf"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "c6afe8aedfafc7b8ac1bc1e766d3d8ecabc3c6cff576b6f217b2859bb1256e35" => :high_sierra
-    sha256 "ec24bdf809b1226a1c5ffe6b805b58f70551fbde5529cd68321be71c43c17a7e" => :sierra
-    sha256 "a78fabea88eaa0265505a6034f70988338e433bd0f6f70f8a6e4c4d3d317b185" => :el_capitan
+    sha256 "a02ea4967e809c9254dac7726c7ee9365e1ba99a8eef68fe6dfd4de34d2fa5af" => :mojave
+    sha256 "0e5c126d7cb1c5ed3211ee1758a388597b00f32c3fb22c0420919e3667371ee2" => :high_sierra
+    sha256 "d22e5b8b66ab51d8c6d324330178284c9b35e3ef17362724089e1e979e9c05d4" => :sierra
   end
 
-  depends_on "abook" => :recommended
+  depends_on "abook"
 
   def install
     system "./configure", "--prefix=#{prefix}", "--libdir=#{lib}/lbdb"
@@ -19,6 +19,7 @@ class Lbdb < Formula
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/lbdbq -v")
+    ver = version.to_s.split(".")
+    assert_match "#{ver[0]}.#{ver[1]}", shell_output("#{bin}/lbdbq -v")
   end
 end

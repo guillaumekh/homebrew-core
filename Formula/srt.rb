@@ -1,23 +1,24 @@
 class Srt < Formula
   desc "Secure Reliable Transport"
   homepage "https://www.srtalliance.org/"
-  url "https://github.com/Haivision/srt/archive/v1.2.3.tar.gz"
-  sha256 "81c728c04732b79e350ada51a8d54021906ee3e910e798e2968091a6f6b86eff"
+  url "https://github.com/Haivision/srt/archive/v1.3.4.tar.gz"
+  sha256 "d3ddf3ad89eb93a4dbf44046775eb63e04780cc536781490d65321d78d4b19de"
+  revision 1
   head "https://github.com/Haivision/srt.git"
 
   bottle do
     cellar :any
-    sha256 "cdee26c726e59591902ac41938fec5228bd744719bbf2921d3d2595d5e50a092" => :high_sierra
-    sha256 "f57690fd8c02044a5186e293b41d46e0ad358a175ac0bf66426a5999a106b7ad" => :sierra
-    sha256 "ad9789b5dd5d365b6087a339bf7f99f526da7962883f99ee762cd3e0e8d24233" => :el_capitan
+    sha256 "775311e52cde0937eb3d2082b080ea023673bedf65c044fdad67b1740e7f5fa6" => :mojave
+    sha256 "3d8ec15e6670482c6ced3d98cd6dfc4726318d9b4d1b37d2ea00692e01a1b778" => :high_sierra
+    sha256 "5b305e2360bb7ec1f0d6e6154b42d5dbc0face555e9e7182aac6be7def0dca77" => :sierra
   end
 
   depends_on "cmake" => :build
   depends_on "pkg-config" => :build
-  depends_on "openssl"
+  depends_on "openssl@1.1"
 
   def install
-    openssl = Formula["openssl"]
+    openssl = Formula["openssl@1.1"]
     system "cmake", ".", "-DWITH_OPENSSL_INCLUDEDIR=#{openssl.opt_include}",
                          "-DWITH_OPENSSL_LIBDIR=#{openssl.opt_lib}",
                          *std_cmake_args
@@ -25,6 +26,7 @@ class Srt < Formula
   end
 
   test do
-    system "#{bin}/stransmit", "file:///dev/null", "file://con/"
+    cmd = "#{bin}/srt-live-transmit file:///dev/null file://con/ 2>&1"
+    assert_match "Unsupported source type", shell_output(cmd, 1)
   end
 end

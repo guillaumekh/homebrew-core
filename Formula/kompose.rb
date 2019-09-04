@@ -1,14 +1,14 @@
 class Kompose < Formula
   desc "Tool to move from `docker-compose` to Kubernetes"
-  homepage "http://kompose.io"
-  url "https://github.com/kubernetes/kompose/archive/v1.11.0.tar.gz"
-  sha256 "f74ac2061fb535cb35f09ad1971684692816e6cf79d559b716824a3ade3a39df"
+  homepage "https://kompose.io/"
+  url "https://github.com/kubernetes/kompose/archive/v1.18.0.tar.gz"
+  sha256 "6da3ba8b66c7023f66b3ddc8f9ff1e5ce5f38e299da9ff93c4dd1c2a765b8dc5"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "cc69957bd59ac3abaebc75117fa5f907b63b2ce1b910250aa34a05d45a8f139f" => :high_sierra
-    sha256 "d7c87e233736b65de5652783958eb2796b13234ee408151e4e26ac4df21cdb37" => :sierra
-    sha256 "4dc9eeff2221913c230985d3950566a0ec411e72651441b18fd844d6f268c5c3" => :el_capitan
+    sha256 "f5aa21a04462d384e5eee491c064417868a987643e483d0abdf63b34ff1ef384" => :mojave
+    sha256 "cca8ebca8fc06f5b756f8c507b69b4cf1e4dd43b8d77cd1aa42fb2a33e931e36" => :high_sierra
+    sha256 "1da9458290ae98190c8b05bc43542fbc6aae5f0a18ee6b5f1a2e58b44647ee73" => :sierra
   end
 
   depends_on "go" => :build

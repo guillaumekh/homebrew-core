@@ -1,15 +1,15 @@
 class DnscryptProxy < Formula
   desc "Secure communications between a client and a DNS resolver"
   homepage "https://github.com/jedisct1/dnscrypt-proxy"
-  url "https://github.com/jedisct1/dnscrypt-proxy/archive/2.0.8.tar.gz"
-  sha256 "a99fc2b055618b0578ebe1477769bf9dddff7daa653649bd73f4bcf650bc8d40"
+  url "https://github.com/jedisct1/dnscrypt-proxy/archive/2.0.25.tar.gz"
+  sha256 "774696004c9e306e1723b4cbbe66a961128a335543d318d0786492ce69b906fa"
   head "https://github.com/jedisct1/dnscrypt-proxy.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "52c91bc1e3c95b2f34a6ec5ca58f8f4a443473911c0f6c6b77b0be439b59ee0b" => :high_sierra
-    sha256 "38b63fa57ca3c5bb66f094271b7dfb366c3a757c4f8aff7e8a8401aa27ca72b7" => :sierra
-    sha256 "754322fb4342519b9417376ee0d197456b0173d1c975c2f500269c8500f04a1d" => :el_capitan
+    sha256 "bf2ef254831b31ac28994a4040067379d0cf0bf70b09bd08f4711d0f5e1a01b2" => :mojave
+    sha256 "b545bd6d3382892ef6ab9e644d5a8c918ef8686223660af6d4d1651b0bac0ca1" => :high_sierra
+    sha256 "c3b23707a07cfe9d11314320a04a592fd29bde6ca270293e30d869327103491e" => :sierra
   end
 
   depends_on "go" => :build
@@ -37,8 +37,8 @@ class DnscryptProxy < Formula
     can click "+" and enter 127.0.0.1 in the "DNS Servers" section.
 
     By default, dnscrypt-proxy runs on localhost (127.0.0.1), port 53,
-    using a random resolver. If you would like to change these settings,
-    you will have to edit the configuration file:
+    balancing traffic across a set of resolvers. If you would like to
+    change these settings, you will have to edit the configuration file:
       #{etc}/dnscrypt-proxy.toml
 
     To check that dnscrypt-proxy is working correctly, open Terminal and enter the
@@ -56,7 +56,7 @@ class DnscryptProxy < Formula
 
   def plist; <<~EOS
     <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-/Apple/DTD PLIST 1.0/EN" "http:/www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
     <plist version="1.0">
       <dict>
         <key>Label</key>
@@ -79,7 +79,7 @@ class DnscryptProxy < Formula
         <string>/dev/null</string>
       </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do

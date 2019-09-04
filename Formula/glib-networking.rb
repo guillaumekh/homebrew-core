@@ -1,50 +1,38 @@
 class GlibNetworking < Formula
   desc "Network related modules for glib"
   homepage "https://launchpad.net/glib-networking"
-  url "https://download.gnome.org/sources/glib-networking/2.56/glib-networking-2.56.0.tar.xz"
-  sha256 "47fd10bcae2e5039dc5f685e3ea384f48e64a6bee26d755718f534a978477c93"
+  url "https://download.gnome.org/sources/glib-networking/2.60/glib-networking-2.60.3.tar.xz"
+  sha256 "d50183046a4ff955d8cc7e953067cdfc94f14dbfda3024bf377ff37a3121dcd5"
+  revision 1
 
   bottle do
-    sha256 "2652423ef861ab0edc112c8e54d035affe8dac683620bebcb04d2f5de98e106f" => :high_sierra
-    sha256 "3c80e128d2afebcd63a07b98aed1b3cbc8e83b805536117dc32b589dc9eb7a95" => :sierra
-    sha256 "ce352511f58a0d1a10d0a65f1f01feda8be6703050b322c6e6cd86b62ca2f0ea" => :el_capitan
+    sha256 "209a75b4b9c0ce21e08efe3963bdbd59ac1cc353900da1afb3637ba2c1c7e882" => :mojave
+    sha256 "d309a9f5ef1d8cbc33620b9581bfcd95b94d08395d359173589ec19a5c82c613" => :high_sierra
+    sha256 "7b96cd7243418a277325754e330f673b6c48bbf0de71b4474e7898fd373fb416" => :sierra
   end
 
   depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
+  depends_on "python" => :build
   depends_on "glib"
   depends_on "gnutls"
   depends_on "gsettings-desktop-schemas"
 
   link_overwrite "lib/gio/modules"
 
-  # see https://bugzilla.gnome.org/show_bug.cgi?id=794292
-  # merged in upstream, remove when update is released
-  patch :DATA
-
   def install
-    # Install files to `lib` instead of `HOMEBREW_PREFIX/lib`.
-    inreplace "meson.build", "gio_dep.get_pkgconfig_variable('giomoduledir')", "'#{lib}/gio/modules'"
-
     # stop meson_post_install.py from doing what needs to be done in the post_install step
-    ENV["DESTDIR"] = ""
+    ENV["DESTDIR"] = "/"
+
     mkdir "build" do
       system "meson", "--prefix=#{prefix}",
-                      # Remove when p11-kit >= 0.20.7 builds on OSX
-                      # see https://github.com/Homebrew/homebrew/issues/36323
-                      # and https://bugs.freedesktop.org/show_bug.cgi?id=91602
-                      "-Dpkcs11_support=false",
-                      "-Dlibproxy_support=false",
-                      "-Dca_certificates_path=#{etc}/openssl/cert.pem",
+                      "-Dlibproxy=disabled",
+                      "-Dopenssl=disabled",
+                      "-Dgnome_proxy=disabled",
                       ".."
-      system "ninja"
-      system "ninja", "install"
-    end
-
-    # rename .dylib to .so, which is what glib expects
-    # see https://github.com/mesonbuild/meson/issues/3053
-    Dir.glob(lib/"gio/modules/*.dylib").each do |f|
-      mv f, "#{File.dirname(f)}/#{File.basename(f, ".dylib")}.so"
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
     end
   end
 
@@ -79,41 +67,3 @@ class GlibNetworking < Formula
     system "./gtls-test"
   end
 end
-
-__END__
-diff --git a/meson.build b/meson.build
-index f923e53..a295d2d 100644
---- a/meson.build
-+++ b/meson.build
-@@ -112,9 +112,9 @@ if enable_libproxy_support or enable_gnome_proxy_support
-   subdir('proxy/tests')
- endif
-
--if enable_pkcs11_support
--  tls_inc = include_directories('tls')
-+tls_inc = include_directories('tls')
-
-+if enable_pkcs11_support
-   subdir('tls/pkcs11')
- endif
-
-diff --git a/tls/tests/meson.build b/tls/tests/meson.build
-index 7e1ae13..fbefb15 100644
---- a/tls/tests/meson.build
-+++ b/tls/tests/meson.build
-@@ -1,4 +1,4 @@
--incs = [top_inc]
-+incs = [top_inc, tls_inc]
-
- deps = [
-   gio_dep,
-@@ -25,8 +25,6 @@ test_programs = [
- ]
-
- if enable_pkcs11_support
--  incs += tls_inc
--
-   pkcs11_deps = deps + [
-     libgiopkcs11_dep,
-     pkcs11_dep
-

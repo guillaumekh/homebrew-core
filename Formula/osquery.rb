@@ -1,38 +1,41 @@
 class Osquery < Formula
   desc "SQL powered operating system instrumentation and analytics"
   homepage "https://osquery.io"
-  # pull from git tag to get submodules
-  url "https://github.com/facebook/osquery/archive/3.2.0.tar.gz"
-  sha256 "91328ab9a322f6859925f69af9005f75792ce128e261f97d0c4e339db55ce23e"
+  url "https://github.com/facebook/osquery/archive/3.3.2.tar.gz"
+  sha256 "74280181f45046209053a3e15114d93adc80929a91570cc4497931cfb87679e4"
+  revision 6
 
   bottle do
     cellar :any
-    sha256 "0a8b3376d3228b129f06f815d408eca013e9075434fd0609cc6973b7aa75d821" => :high_sierra
-    sha256 "ff867762a308a5bc5fb5f4a35f46d23efd1e2b912fb56b208230f37f9cd77b92" => :sierra
+    sha256 "22cda8cee5185a984276aff7c021f2277f7fe0a2beae640c259954fad19b812d" => :mojave
+    sha256 "c25d1d5c72f8955617a93491f55af9fa307aa7533ac9405cf8004ce0a8cd2c13" => :high_sierra
+    sha256 "abaae603c1e1c59c5c70fc798bedf2520521c63aa7c4652b87a4b796d885e86d" => :sierra
   end
 
-  fails_with :gcc => "6"
-
-  # osquery only supports macOS 10.12 and above. Do not remove this.
-  depends_on :macos => :sierra
   depends_on "bison" => :build
   depends_on "cmake" => :build
+  depends_on "python" => :build
   depends_on "augeas"
   depends_on "boost"
   depends_on "gflags"
   depends_on "glog"
   depends_on "libarchive"
   depends_on "libmagic"
-  depends_on "lldpd"
   depends_on "librdkafka"
+  depends_on "lldpd"
+  # osquery only supports macOS 10.12 and above. Do not remove this.
+  depends_on :macos => :sierra
   depends_on "openssl"
   depends_on "rapidjson"
   depends_on "rocksdb"
   depends_on "sleuthkit"
+  depends_on "ssdeep"
   depends_on "thrift"
-  depends_on "yara"
   depends_on "xz"
+  depends_on "yara"
   depends_on "zstd"
+
+  fails_with :gcc => "6"
 
   resource "MarkupSafe" do
     url "https://files.pythonhosted.org/packages/c0/41/bae1254e0396c0cc8cf1751cb7d9afc90a602353695af5952530482c963f/MarkupSafe-0.23.tar.gz"
@@ -50,8 +53,15 @@ class Osquery < Formula
   end
 
   resource "aws-sdk-cpp" do
-    url "https://github.com/aws/aws-sdk-cpp/archive/1.3.30.tar.gz"
-    sha256 "7b5f9b6d4215069fb75d31db2c8ab06081ab27f59ee33d5bb428fec3e30723f1"
+    url "https://github.com/aws/aws-sdk-cpp/archive/1.4.55.tar.gz"
+    sha256 "0a70c2998d29cc4d8a4db08aac58eb196d404073f6586a136d074730317fe408"
+  end
+
+  # Upstream fix for boost 1.69, remove in next version
+  # https://github.com/facebook/osquery/pull/5496
+  patch do
+    url "https://github.com/facebook/osquery/commit/130b3b3324e2.diff?full_index=1"
+    sha256 "46bce0c62f1a8f0df506855049991e6fceb6d1cc4e1113a2f657e76b5c5bdd14"
   end
 
   def install
@@ -80,20 +90,25 @@ class Osquery < Formula
     ENV["SKIP_TESTS"] = "1"
     ENV["SKIP_DEPS"] = "1"
 
+    # Skip SMART drive tables.
+    # SMART requires a dependency that isn't packaged by brew.
+    ENV["SKIP_SMART"] = "1"
+
     # Link dynamically against brew-installed libraries.
     ENV["BUILD_LINK_SHARED"] = "1"
     # Set the version
     ENV["OSQUERY_BUILD_VERSION"] = version
 
-    ENV.prepend_create_path "PYTHONPATH", buildpath/"third-party/python/lib/python2.7/site-packages"
+    xy = Language::Python.major_minor_version "python3"
+    ENV.prepend_create_path "PYTHONPATH", buildpath/"third-party/python/lib/python#{xy}/site-packages"
 
     res = resources.map(&:name).to_set - %w[aws-sdk-cpp third-party]
     res.each do |r|
       resource(r).stage do
-        system "python", "setup.py", "install",
-                                 "--prefix=#{buildpath}/third-party/python/",
-                                 "--single-version-externally-managed",
-                                 "--record=installed.txt"
+        system "python3", "setup.py", "install",
+                          "--prefix=#{buildpath}/third-party/python/",
+                          "--single-version-externally-managed",
+                          "--record=installed.txt"
       end
     end
 

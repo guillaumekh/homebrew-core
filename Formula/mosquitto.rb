@@ -1,27 +1,24 @@
 class Mosquitto < Formula
   desc "Message broker implementing the MQTT protocol"
   homepage "https://mosquitto.org/"
-  url "https://mosquitto.org/files/source/mosquitto-1.4.14.tar.gz"
-  sha256 "156b1fa731d12baad4b8b22f7b6a8af50ba881fc711b81e9919ec103cf2942d1"
-  revision 2
+  url "https://mosquitto.org/files/source/mosquitto-1.6.4.tar.gz"
+  sha256 "a3d5822c249f6a6e13311b1b09eff6807ea01608a5a77934e1769842e9d146ef"
+  revision 1
 
   bottle do
-    sha256 "db6cc90bff7409aa2d287a9e090458fc5ffd2ef882c6d38efee28bfe9bc43bae" => :high_sierra
-    sha256 "88a6fd908f71fdf46ed19f0baa7154759751227c92234afe30ba27bf218db653" => :sierra
-    sha256 "d3195ebbcd82c77b56a0e65c1752ae803d5593d2a39b665e0524c853a0520878" => :el_capitan
+    cellar :any
+    sha256 "af872a69b14e4afb695e0a1b3b5cbab1c173745786f8ca50b96c97fa69a3bdf3" => :mojave
+    sha256 "b6aa2771c20eb913832555dac11f82ba2708cd6d635726c763a759e4db05db6d" => :high_sierra
+    sha256 "44f0b813a9e12316a893c933e5c86dc30433a89b580f781c89f4f0db35adfd4a" => :sierra
   end
 
-  depends_on "pkg-config" => :build
   depends_on "cmake" => :build
-  depends_on "c-ares"
+  depends_on "pkg-config" => :build
+  depends_on "libwebsockets"
   depends_on "openssl"
-  depends_on "libwebsockets" => :recommended
 
   def install
-    args = std_cmake_args
-    args << "-DWITH_WEBSOCKETS=ON" if build.with? "libwebsockets"
-
-    system "cmake", ".", *args
+    system "cmake", ".", *std_cmake_args, "-DWITH_WEBSOCKETS=ON"
     system "make", "install"
   end
 
@@ -33,7 +30,7 @@ class Mosquitto < Formula
     mosquitto has been installed with a default configuration file.
     You can make changes to the configuration by editing:
         #{etc}/mosquitto/mosquitto.conf
-    EOS
+  EOS
   end
 
   plist_options :manual => "mosquitto -c #{HOMEBREW_PREFIX}/etc/mosquitto/mosquitto.conf"
@@ -59,7 +56,7 @@ class Mosquitto < Formula
       <string>#{var}/mosquitto</string>
     </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do

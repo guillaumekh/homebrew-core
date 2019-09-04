@@ -1,21 +1,22 @@
 class IrcdHybrid < Formula
   desc "High-performance secure IRC server"
   homepage "http://www.ircd-hybrid.org/"
-  url "https://downloads.sourceforge.net/project/ircd-hybrid/ircd-hybrid/ircd-hybrid-8.2.23/ircd-hybrid-8.2.23.tgz"
-  sha256 "3a70bfbad56a6f58ec653b7fd3992c1ab75e4e7727a85ec1a9f73927196660b7"
+  url "https://downloads.sourceforge.net/project/ircd-hybrid/ircd-hybrid/ircd-hybrid-8.2.24/ircd-hybrid-8.2.24.tgz"
+  sha256 "eaa42d8bf10c0e619e3bda96f35d31bb20715305a85a1386cfbc6b8761fed50e"
+  revision 1
 
   bottle do
-    sha256 "9113d2a3fae2abbd0ed3f2c34d71d276a96f34de01703099dac22cfd9cac3d42" => :high_sierra
-    sha256 "0af883166ec878a5e57b6a0200812e777fffa39ee95341f065ecde4d8aca0d61" => :sierra
-    sha256 "5369177134d238aae8a496e10e086bc9f58b1b06f4a4e12b9399bab6df38118d" => :el_capitan
+    sha256 "478efdf1f24ce2baa47511c4cfa2c451703140c760186a8845fecc765c3b38c4" => :mojave
+    sha256 "36d3e9d28b01f104593703ebe93a230a170247090e78b492cee72eb55c3cedcc" => :high_sierra
+    sha256 "f61894f34fb608a97f4df370f9f466a129f418d8eb48781fe936ff5f145c2c5a" => :sierra
   end
+
+  depends_on "openssl@1.1"
+
+  conflicts_with "ircd-irc2", :because => "both install an `ircd` binary"
 
   # ircd-hybrid needs the .la files
   skip_clean :la
-
-  depends_on "openssl"
-
-  conflicts_with "ircd-irc2", :because => "both install an `ircd` binary"
 
   def install
     ENV.deparallelize # build system trips over itself
@@ -24,7 +25,7 @@ class IrcdHybrid < Formula
                           "--prefix=#{prefix}",
                           "--localstatedir=#{var}",
                           "--sysconfdir=#{etc}",
-                          "--enable-openssl=#{Formula["openssl"].opt_prefix}"
+                          "--enable-openssl=#{Formula["openssl@1.1"].opt_prefix}"
     system "make", "install"
     etc.install "doc/reference.conf" => "ircd.conf"
   end
@@ -32,7 +33,7 @@ class IrcdHybrid < Formula
   def caveats; <<~EOS
     You'll more than likely need to edit the default settings in the config file:
       #{etc}/ircd.conf
-    EOS
+  EOS
   end
 
   plist_options :manual => "ircd"
@@ -58,7 +59,7 @@ class IrcdHybrid < Formula
       <string>#{var}/ircd.log</string>
     </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do

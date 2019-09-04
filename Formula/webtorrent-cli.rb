@@ -3,13 +3,13 @@ require "language/node"
 class WebtorrentCli < Formula
   desc "Command-line streaming torrent client"
   homepage "https://webtorrent.io/"
-  url "https://registry.npmjs.org/webtorrent-cli/-/webtorrent-cli-1.11.0.tgz"
-  sha256 "682f4c5f21aa40974fab3c2e2ea032f0e4af2c09472c9f934efa58e4514b8a03"
+  url "https://registry.npmjs.org/webtorrent-cli/-/webtorrent-cli-3.0.0.tgz"
+  sha256 "beb26d0dd4cacdf09042a997c68a30d61577dc920936462669188fe4a74c3581"
 
   bottle do
-    sha256 "7a7c8ea2a2205599d99b767cf0eb6b2bda52c2e1327887e337c53d577fbb1e25" => :high_sierra
-    sha256 "bef775f7a8c307010d204911fcd5f682af88e97d94751cf2af257c894dead67b" => :sierra
-    sha256 "468d90082e2916c432816e26cd9455d71f12899617e1c187a2f0569daa8a9800" => :el_capitan
+    sha256 "763b25ec1afb357d3164ebb14f8fcd587faff15161f89b075ca5be496c4a9116" => :mojave
+    sha256 "d06fbde070d023361b5d4ad0469c9f8fa765c55273ea9ad365796f41386a5329" => :high_sierra
+    sha256 "329f669b198a61a071a67a5fd6ee896b5168be8a67bf12cdf913338d730af2c0" => :sierra
   end
 
   depends_on "node"
@@ -24,7 +24,7 @@ class WebtorrentCli < Formula
       magnet:?xt=urn:btih:9eae210fe47a073f991c83561e75d439887be3f3
       &dn=archlinux-2017.02.01-x86_64.iso
       &tr=udp://tracker.archlinux.org:6969
-      &tr=http://tracker.archlinux.org:6969/announce
+      &tr=https://tracker.archlinux.org:443/announce
     EOS
 
     assert_equal <<~EOS.chomp, shell_output("#{bin}/webtorrent info '#{magnet_uri}'")
@@ -32,13 +32,13 @@ class WebtorrentCli < Formula
         "xt": "urn:btih:9eae210fe47a073f991c83561e75d439887be3f3",
         "dn": "archlinux-2017.02.01-x86_64.iso",
         "tr": [
-          "http://tracker.archlinux.org:6969/announce",
+          "https://tracker.archlinux.org:443/announce",
           "udp://tracker.archlinux.org:6969"
         ],
         "infoHash": "9eae210fe47a073f991c83561e75d439887be3f3",
         "name": "archlinux-2017.02.01-x86_64.iso",
         "announce": [
-          "http://tracker.archlinux.org:6969/announce",
+          "https://tracker.archlinux.org:443/announce",
           "udp://tracker.archlinux.org:6969"
         ],
         "urlList": []

@@ -1,29 +1,32 @@
 class Cockroach < Formula
   desc "Distributed SQL database"
   homepage "https://www.cockroachlabs.com"
-  url "https://binaries.cockroachdb.com/cockroach-v1.1.7.src.tgz"
-  version "1.1.7"
-  sha256 "f6ce7290ba1eac5dd5e94d1ef44cd3c1f52ef01622d0b4a8c8797c0b7cb53b00"
+  url "https://binaries.cockroachdb.com/cockroach-v19.1.4.src.tgz"
+  version "19.1.4"
+  sha256 "d819167dc109b566511cb6cef9aadc8c4f07b1be6a8b3108f4bbd14808d21faf"
   head "https://github.com/cockroachdb/cockroach.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "ca276d2ff88b3b4f170ebd8ea1036b3fb1a5fdf93a6330a62c457ed00fce1df8" => :high_sierra
-    sha256 "d459862001328b415c279634c7ab87d98972e5c941970159280103f55978af46" => :sierra
-    sha256 "03fe022a0ea5112460366c8663088d70d523dbc390750b26eec4b5dd6f3e4e67" => :el_capitan
+    sha256 "82d20462ca26fcdaad2c4639582bc3cbb10fee2ca9fb63d1944648dc9fdf461a" => :mojave
+    sha256 "247cea9630fdc06c497c42ccf6290b601870eaac96a14ec91a993e87bbf5acb1" => :high_sierra
+    sha256 "f55c8f203ff3c49312641f81d7a15c4f3bcc02c5a5585981574b11161eeda62d" => :sierra
   end
 
   depends_on "autoconf" => :build
   depends_on "cmake" => :build
   depends_on "go" => :build
+  depends_on "make" => :build
   depends_on "xz" => :build
 
   def install
-    # unpin the Go version
-    go_version = Formula["go"].installed_version.to_s.split(".")[0, 2].join(".")
-    inreplace "src/github.com/cockroachdb/cockroach/.go-version",
-              /^GOVERS = go.*/, "GOVERS = go#{go_version.gsub(".", "\\.")}.*"
-    system "make", "install", "prefix=#{prefix}"
+    # The GNU Make that ships with macOS Mojave (v3.81 at the time of writing) has a bug
+    # that causes it to loop infinitely when trying to build cockroach. Use
+    # the more up-to-date make that Homebrew provides.
+    ENV.prepend_path "PATH", Formula["make"].opt_libexec/"gnubin"
+    # Build only the OSS components
+    system "make", "buildoss"
+    system "make", "install", "prefix=#{prefix}", "BUILDTYPE=release"
   end
 
   def caveats; <<~EOS
@@ -37,7 +40,7 @@ class Cockroach < Formula
     mode and may expose data publicly in e.g. a DNS rebinding attack. To run
     CockroachDB securely, please see:
       #{Formatter.url("https://www.cockroachlabs.com/docs/secure-a-cluster.html")}
-    EOS
+  EOS
   end
 
   plist_options :manual => "cockroach start --insecure"
@@ -66,7 +69,7 @@ class Cockroach < Formula
       <true/>
     </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do
@@ -84,8 +87,16 @@ class Cockroach < Formula
       assert_equal <<~EOS, output
         id,balance
         1,1000.50
-        # 1 row
       EOS
+    rescue => e
+      # If an error occurs, attempt to print out any messages from the
+      # server.
+      begin
+        $stderr.puts "server messages:", File.read("start.out")
+      rescue
+        $stderr.puts "unable to load messages from start.out"
+      end
+      raise e
     ensure
       system "#{bin}/cockroach", "quit", "--insecure"
     end

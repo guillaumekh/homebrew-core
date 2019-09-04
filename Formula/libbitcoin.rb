@@ -1,14 +1,15 @@
 class Libbitcoin < Formula
   desc "Bitcoin Cross-Platform C++ Development Toolkit"
-  homepage "https://libbitcoin.org/"
-  url "https://github.com/libbitcoin/libbitcoin/archive/v3.5.0.tar.gz"
-  sha256 "214d9cd6581330b0e1f6fd8f0c634c46b75ae5515806ecac189f21c0291ae2d9"
+  homepage "https://github.com/libbitcoin/libbitcoin-system"
+  url "https://github.com/libbitcoin/libbitcoin-system/archive/v3.6.0.tar.gz"
+  sha256 "5bcc4c31b53acbc9c0d151ace95d684909db4bf946f8d724f76c711934c6775c"
+  revision 1
 
   bottle do
     cellar :any
-    sha256 "19677df80f33895bbe4ef04b06a5832111988f41840ce10bda5f7a1e0224a646" => :high_sierra
-    sha256 "6e55702d715ed8eb9093d5e437d176b7f457fa67e514a86c6e42bbec533936ae" => :sierra
-    sha256 "8dd52f0bf0a8267451bc527f726083242b8f16e32c24109847d73ba79599fde1" => :el_capitan
+    sha256 "1cb73cc7c259fb733bf0db315b62ae9ec555bff79202eee3485fdc744250d30f" => :mojave
+    sha256 "bd50578d7006f7caf00203bb0c4ff2359e010fa2e54c49e43a2f5b993c2c66f7" => :high_sierra
+    sha256 "99a4275be13140f30688d8cc59c07ec3eac1e4720e7623bdfc6615b1941f7ecf" => :sierra
   end
 
   depends_on "autoconf" => :build
@@ -55,12 +56,13 @@ class Libbitcoin < Formula
         const auto& input = tx.inputs().front();
         const auto script = input.script().to_data(false);
         std::string message(script.begin() + sizeof(uint64_t), script.end());
-        bc::cout << message << std::endl;
+        std::cout << message << std::endl;
         return 0;
       }
     EOS
-    system ENV.cxx, "-std=c++11", "test.cpp", "-L#{lib}",
-                    "-lbitcoin", "-lboost_system", "-o", "test"
+    system ENV.cxx, "-std=c++11", "test.cpp", "-L#{lib}", "-lbitcoin",
+                    "-L#{Formula["boost"].opt_lib}", "-lboost_system",
+                    "-o", "test"
     system "./test"
   end
 end

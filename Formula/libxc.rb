@@ -1,15 +1,14 @@
 class Libxc < Formula
   desc "Library of exchange and correlation functionals for codes"
-  homepage "http://octopus-code.org/wiki/Libxc"
-  url "http://www.tddft.org/programs/octopus/down.php?file=libxc/3.0.1/libxc-3.0.1.tar.gz"
-  sha256 "836692f2ab60ec3aca0cca105ed5d0baa7d182be07cc9d0daa7b80ee1362caf7"
-  revision 1
+  homepage "https://tddft.org/programs/libxc/"
+  url "https://tddft.org/programs/octopus/download/libxc/4.3.4/libxc-4.3.4.tar.gz"
+  sha256 "a8ee37ddc5079339854bd313272856c9d41a27802472ee9ae44b58ee9a298337"
 
   bottle do
     cellar :any
-    sha256 "10edb1b0047a9d08e4d86ebb49b3ff6f257649192be8f430893a29534c26cff7" => :high_sierra
-    sha256 "fb24b4f5ce8c2c2a438b26cdd33264850911ccd91494e038fd320b3cab8e4688" => :sierra
-    sha256 "7c5c77cef496e0d919fe0a99ee63c3594985be5f35d908bb4a1144f0dbad19bc" => :el_capitan
+    sha256 "f8b5f2dff116944721e2a0f3d9b8de233dd7ed5672a7a5e049be46d479be364f" => :mojave
+    sha256 "c3e5f9d0fc66335ce0d246d2ed308b0d1ece555db9a2c877bcbb493813cff9ff" => :high_sierra
+    sha256 "0022f8f1f5d6f4fb7a842b1aef84660c2cf39b081d0003c5a21c365f8e6a35d8" => :sierra
   end
 
   depends_on "gcc" # for gfortran

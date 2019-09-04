@@ -5,20 +5,19 @@ class Gitfs < Formula
   homepage "https://www.presslabs.com/gitfs"
   url "https://github.com/PressLabs/gitfs/archive/0.4.5.1.tar.gz"
   sha256 "6049fd81182d9172e861d922f3e2660f76366f85f47f4c2357f769d24642381c"
-  revision 1
+  revision 4
   head "https://github.com/PressLabs/gitfs.git"
 
   bottle do
     cellar :any
-    sha256 "29951f6b6a8d983fdc70dcdb521d0f1cb5bb6e2f01c8b5c7e6c76cc8733507c7" => :high_sierra
-    sha256 "7c2ccf5484a84e8beb07e0aac7b9b61178da275deba85ad199924d452b536aef" => :sierra
-    sha256 "924e0207bf6dddd61455a78b92f7bbfa940607834b5a0d1e5f2d60e16b13a9e2" => :el_capitan
-    sha256 "20a796f7b30c7f3fbb2273ed7d5823fb4a53bd708e0854add3d536aa09619f3a" => :yosemite
+    sha256 "7859077b249dd271735ef57f6472aefec42708ed8efafc472f81ff31e77d0726" => :mojave
+    sha256 "9f70c9b930752bc09c7f141b7a77990ed96b9dd995c087f6b861831e249830a2" => :high_sierra
+    sha256 "5a85dbfb02e93e66495b512a10348242f7e6380d690af2aebc8bd4b48d2e0f22" => :sierra
   end
 
   depends_on "libgit2"
   depends_on :osxfuse
-  depends_on "python@2" if MacOS.version <= :snow_leopard
+  depends_on "python"
 
   resource "atomiclong" do
     url "https://files.pythonhosted.org/packages/86/8c/70aea8215c6ab990f2d91e7ec171787a41b7fbc83df32a067ba5d7f3324f/atomiclong-0.1.1.tar.gz"
@@ -36,8 +35,8 @@ class Gitfs < Formula
   end
 
   resource "pygit2" do
-    url "https://files.pythonhosted.org/packages/84/fa/867aec49165bd119b215d997e4d1211875e398d956b26888cd47070145a7/pygit2-0.26.0.tar.gz"
-    sha256 "a7f06d61f25ab644c39e0e9bd4846a6cc4af81ae27f889473e6f0e9511226cb1"
+    url "https://files.pythonhosted.org/packages/ec/56/9f591bee962dcdc3c4268c4bf0a836d5188b1604e58e3618df12a963573b/pygit2-0.28.1.tar.gz"
+    sha256 "2ccdb865ef530c799a6430d0e52952925ffc0d7c856e7608f4cf42f4b821412b"
   end
 
   resource "six" do
@@ -55,11 +54,12 @@ class Gitfs < Formula
     repo_path argument.
 
     Also make sure OSXFUSE is properly installed by running brew info osxfuse.
-    EOS
+  EOS
   end
 
   test do
-    ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python2.7/site-packages"
+    xy = Language::Python.major_minor_version "python3"
+    ENV.prepend_create_path "PYTHONPATH", libexec/"lib/python#{xy}/site-packages"
 
     (testpath/"test.py").write <<~EOS
       import gitfs
@@ -67,7 +67,7 @@ class Gitfs < Formula
       pygit2.init_repository('testing/.git', True)
     EOS
 
-    system "python", "test.py"
+    system "python3", "test.py"
     assert_predicate testpath/"testing/.git/config", :exist?
     cd "testing" do
       system "git", "remote", "add", "homebrew", "https://github.com/Homebrew/homebrew.git"

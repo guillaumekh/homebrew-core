@@ -1,30 +1,31 @@
 class Libosmium < Formula
   desc "Fast and flexible C++ library for working with OpenStreetMap data"
-  homepage "http://osmcode.org/libosmium/"
-  url "https://github.com/osmcode/libosmium/archive/v2.13.1.tar.gz"
-  sha256 "a73cd56838a7438bd9ed208c9ce6794e2d55a1854039c4277a0c160d5071b909"
+  homepage "https://osmcode.org/libosmium/"
+  url "https://github.com/osmcode/libosmium/archive/v2.15.2.tar.gz"
+  sha256 "be53024e16946ce49ff787f3ce569aa5710010236db68f971433ac6a10318a46"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "2310327bcf2f8e1cc4937da5a7cd7ba526fb8e73435febcb7b5c3e6d879b8ef4" => :high_sierra
-    sha256 "e63f94d42eaf9143c6a8641e365a0fd0ca99281995e647c4964660ef40fb72eb" => :sierra
-    sha256 "e63f94d42eaf9143c6a8641e365a0fd0ca99281995e647c4964660ef40fb72eb" => :el_capitan
-    sha256 "e63f94d42eaf9143c6a8641e365a0fd0ca99281995e647c4964660ef40fb72eb" => :yosemite
+    sha256 "75e519364edc883bffa07dfef3d88df6d4fe56bcf0cc19c0951fcf9fa95fd57e" => :mojave
+    sha256 "75e519364edc883bffa07dfef3d88df6d4fe56bcf0cc19c0951fcf9fa95fd57e" => :high_sierra
+    sha256 "765b186c188877807aa06e03d97084f990e3b1cb83d25309a711d57c0042ac49" => :sierra
   end
 
-  depends_on "cmake" => :build
   depends_on "boost" => :build
-  depends_on "google-sparsehash" => :optional
-  depends_on "expat" => :optional
-  depends_on "gdal" => :optional
-  depends_on "proj" => :optional
-  depends_on "doxygen" => :optional
+  depends_on "cmake" => :build
+
+  resource "protozero" do
+    url "https://github.com/mapbox/protozero/archive/v1.6.8.tar.gz"
+    sha256 "019a0f3789ad29d7e717cf2e0a7475b36dc180508867fb47e8c519885b431706"
+  end
 
   def install
-    mkdir "build" do
-      system "cmake", *std_cmake_args, "-DINSTALL_GDALCPP=ON", "-DINSTALL_PROTOZERO=ON", "-DINSTALL_UTFCPP=ON", ".."
-      system "make", "install"
-    end
+    resource("protozero").stage { libexec.install "include" }
+    system "cmake", ".", "-DINSTALL_GDALCPP=ON",
+                         "-DINSTALL_UTFCPP=ON",
+                         "-DPROTOZERO_INCLUDE_DIR=#{libexec}/include",
+                         *std_cmake_args
+    system "make", "install"
   end
 
   test do

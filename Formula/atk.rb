@@ -1,26 +1,29 @@
 class Atk < Formula
   desc "GNOME accessibility toolkit"
   homepage "https://library.gnome.org/devel/atk/"
-  url "https://download.gnome.org/sources/atk/2.28/atk-2.28.1.tar.xz"
-  sha256 "cd3a1ea6ecc268a2497f0cd018e970860de24a6d42086919d6bf6c8e8d53f4fc"
+  url "https://download.gnome.org/sources/atk/2.32/atk-2.32.0.tar.xz"
+  sha256 "cb41feda7fe4ef0daa024471438ea0219592baf7c291347e5a858bb64e4091cc"
   revision 1
 
   bottle do
-    sha256 "15c80bb42a6c32bf5c86fb17327f9899052680df06572d4b779156bf03e71da7" => :high_sierra
-    sha256 "3bbba246bcef20015b0d83bfb2843982b9bce70dbaaaf657e0a4d25f156986b0" => :sierra
-    sha256 "8b485d88f994d54fad282e8752c14371d28254b12b0569bcfbf07e33205cfc0a" => :el_capitan
+    cellar :any
+    sha256 "ac54bad41a663388d7ce1063229d4aee2b0012ec50aed14a656b05f6347335cc" => :mojave
+    sha256 "7e7350ad341e22ab8acbb92ee7264d61f3eced9d4840653ef73c37127343d312" => :high_sierra
+    sha256 "1656de07be3f8a021e11a0f553929251ffa6a0963968cb36278ba5adb2ed24fb" => :sierra
   end
 
   depends_on "gobject-introspection" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
   depends_on "glib"
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--prefix=#{prefix}",
-                          "--enable-introspection=yes"
-    system "make"
-    system "make", "install"
+    mkdir "build" do
+      system "meson", "--prefix=#{prefix}", ".."
+      system "ninja"
+      system "ninja", "install"
+    end
   end
 
   test do

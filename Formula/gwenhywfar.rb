@@ -1,38 +1,28 @@
 class Gwenhywfar < Formula
   desc "Utility library required by aqbanking and related software"
-  homepage "http://www.aqbanking.de/"
+  homepage "https://www.aquamaniac.de/"
   url "https://www.aquamaniac.de/sites/download/download.php?package=01&release=208&file=02&dummy=gwenhywfar-4.20.0.tar.gz"
   sha256 "5a88daabba1388f9528590aab5de527a12dd44a7da4572ce48469a29911b0fb0"
+  revision 1
 
   bottle do
-    sha256 "229eac2112343d4616576f947213706ebe5f28e0030dd5bef89ee4efa3043ac9" => :high_sierra
-    sha256 "97aaff3937e4551227a66a55963d3dda7e24e53b9e9aa1ffca78ae455be00ab1" => :sierra
-    sha256 "1760007de92dd5e7282a82f2534feb65380338fd8cb11632eef8914c2ddb56a4" => :el_capitan
+    sha256 "504e7a6106bba20337fc73f5210e15e94d0ba403e20e5197157f60cd8d81cd94" => :mojave
+    sha256 "daa91da4c46bdcd6e209f98d28b72462ee60692cbffee0e1243f0939754ecdbc" => :high_sierra
+    sha256 "f89a84a78f7a097d7ccbaa463a0663e9d31fa75ffad489c6de11c59aba5a317a" => :sierra
   end
-
-  option "without-cocoa", "Build without cocoa support"
-  option "with-test", "Run build-time check"
-
-  deprecated_option "with-check" => "with-test"
 
   depends_on "pkg-config" => :build
   depends_on "gettext"
   depends_on "gnutls"
-  depends_on "openssl"
   depends_on "libgcrypt"
-  depends_on "gtk+" => :optional
+  depends_on "openssl"
 
   def install
-    guis = []
-    guis << "gtk2" if build.with? "gtk+"
-    guis << "cocoa" if build.with? "cocoa"
-
     system "autoreconf", "-fiv" if build.head?
     system "./configure", "--disable-debug",
                           "--disable-dependency-tracking",
                           "--prefix=#{prefix}",
-                          "--with-guis=#{guis.join(" ")}"
-    system "make", "check" if build.with? "test"
+                          "--with-guis=cocoa"
     system "make", "install"
   end
 

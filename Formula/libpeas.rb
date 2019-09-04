@@ -3,11 +3,12 @@ class Libpeas < Formula
   homepage "https://developer.gnome.org/libpeas/stable/"
   url "https://download.gnome.org/sources/libpeas/1.22/libpeas-1.22.0.tar.xz"
   sha256 "5b2fc0f53962b25bca131a5ec0139e6fef8e254481b6e777975f7a1d2702a962"
+  revision 3
 
   bottle do
-    sha256 "2ea4bc3ecb98d714926827f205ec7a38023c99809e6c76112966c46ca029560e" => :high_sierra
-    sha256 "761fe27f39245b4e7604d8dc49872a659432e788c179209b63b3a993f273071a" => :sierra
-    sha256 "0f521913ca0eaf13b55aacb75e4b87a730be1f527215741ae2ba207caac523b2" => :el_capitan
+    sha256 "662d750a332d8737fc62da587cac4c65f252b3ab3cd3764137a29329f61ccec4" => :mojave
+    sha256 "690949052e9d12486a79eb0a72c9966a26e56d209ca452fc0e9521b02de5557c" => :high_sierra
+    sha256 "b1139f2529b45ee2b01eaa9d2b0d13734263507ec2939a2a8a79bc4baa75afd1" => :sierra
   end
 
   depends_on "gettext" => :build
@@ -16,12 +17,24 @@ class Libpeas < Formula
   depends_on "glib"
   depends_on "gobject-introspection"
   depends_on "gtk+3"
+  depends_on "pygobject3"
+  depends_on "python"
 
   def install
-    system "./configure", "--disable-dependency-tracking",
-                          "--disable-silent-rules",
-                          "--prefix=#{prefix}",
-                          "--enable-gtk"
+    args = %W[
+      --disable-dependency-tracking
+      --disable-silent-rules
+      --prefix=#{prefix}
+      --enable-gtk
+      --enable-python3
+      --disable-python2
+    ]
+
+    xy = Language::Python.major_minor_version "python3"
+    py3_lib = Formula["python"].opt_frameworks/"Python.framework/Versions/#{xy}/lib"
+    ENV.append "LDFLAGS", "-L#{py3_lib}"
+
+    system "./configure", *args
     system "make", "install"
   end
 

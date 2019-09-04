@@ -1,30 +1,27 @@
 class Libphonenumber < Formula
   desc "C++ Phone Number library by Google"
-  homepage "https://github.com/googlei18n/libphonenumber"
-  url "https://github.com/googlei18n/libphonenumber/archive/v8.9.2.tar.gz"
-  sha256 "5beccbb1c2d364de9979a138311ffd22f5fabf25aa801f1828ac672ebe789382"
-  revision 1
+  homepage "https://github.com/google/libphonenumber"
+  url "https://github.com/google/libphonenumber/archive/v8.10.18.tar.gz"
+  sha256 "b9fc75aa04b3ea260dabc83f93100921b7aaccf91d0685fc2775e778d7619d67"
 
   bottle do
     cellar :any
-    sha256 "cc9063d89529aeeb0a42f56a4f5dbb0e85658dec1743f1d40cbaed6971a741ff" => :high_sierra
-    sha256 "a6ee445643a7527134d14b71e7938a81538416484bb96624b75ebc03e75e6db8" => :sierra
-    sha256 "d5424c8774ac7c6fd305ae7f7c1a6802aa7bb1b3ec9963e406b3ae049671221a" => :el_capitan
+    sha256 "bd386924f341105ebfee79d6d68102e9ac485222ff2252201287d9899475063a" => :mojave
+    sha256 "5b71dc8498e6555137b08e09150b7278555f3f28c44b260e6b533fd43ea7e2c3" => :high_sierra
+    sha256 "2bf47ab9be68a9b480f9715260c65c9b746c417ed817e03012f98cbf80ff2b0e" => :sierra
   end
 
   depends_on "cmake" => :build
-  depends_on :java => "1.7+"
-  depends_on "icu4c"
-  depends_on "protobuf"
   depends_on "boost"
+  depends_on "icu4c"
+  depends_on :java => "1.7+"
+  depends_on "protobuf"
   depends_on "re2"
 
   resource "gtest" do
-    url "https://github.com/google/googletest/archive/release-1.8.0.tar.gz"
-    sha256 "58a6f4277ca2bc8565222b3bbd58a177609e9c488e8a72649359ba51450db7d8"
+    url "https://github.com/google/googletest/archive/release-1.8.1.tar.gz"
+    sha256 "9bf1fe5182a604b4135edc1a425ae356c9ad15e9b23f9f12a02e80184c3a249c"
   end
-
-  needs :cxx11
 
   def install
     ENV.cxx11
@@ -58,7 +55,7 @@ class Libphonenumber < Formula
         }
       }
     EOS
-    system ENV.cxx, "test.cpp", "-L#{lib}", "-lphonenumber", "-o", "test"
+    system ENV.cxx, "-std=c++11", "test.cpp", "-L#{lib}", "-lphonenumber", "-o", "test"
     system "./test"
   end
 end

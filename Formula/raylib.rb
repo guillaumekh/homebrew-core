@@ -1,16 +1,15 @@
 class Raylib < Formula
   desc "Simple and easy-to-use library to learn videogames programming"
-  homepage "http://www.raylib.com/"
-  url "https://github.com/raysan5/raylib/archive/1.9.1-dev.tar.gz"
-  version "1.9.1-dev"
-  sha256 "892357fb44d340eb7449c23c425d660d98b34b91434400e7610514ef02698600"
+  homepage "https://www.raylib.com/"
+  url "https://github.com/raysan5/raylib/archive/2.5.0.tar.gz"
+  sha256 "fa947329975bdc9ea284019f0edc30ca929535dc78dcf8c19676900d67a845ac"
   head "https://github.com/raysan5/raylib.git", :branch => "master"
 
   bottle do
     cellar :any
-    sha256 "f9d6fc5e2f92c15bb6da71df4e0344d9383e803c61a5322f0f202393814f48bb" => :high_sierra
-    sha256 "bd564c34749237dfbc28c490184fd0fc39aab313f19f53fe3d73160dbdaf63e0" => :sierra
-    sha256 "d650d0518043a7a38375d8816d1c13d2dfac3c6e5a3286f9dae379e8451d7ba2" => :el_capitan
+    sha256 "b508af6172e24861365bda6e94731576c0b0ec6f540782e46271c23d35028878" => :mojave
+    sha256 "c8410a481ccadaa944ca296a81f6924731c5201cb3a2b279cf436c044a0310ba" => :high_sierra
+    sha256 "9d40a34b711a48fe4a32b03fc709ce96318111f1ab6f6216f6bd154ac09d4bc5" => :sierra
   end
 
   depends_on "cmake" => :build

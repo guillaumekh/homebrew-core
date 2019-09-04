@@ -1,49 +1,43 @@
 class Pypy3 < Formula
   desc "Implementation of Python 3 in Python"
   homepage "https://pypy.org/"
-  url "https://bitbucket.org/pypy/pypy/downloads/pypy3-v5.10.1-src.tar.bz2"
-  sha256 "f5548e06e2fc0c24ec8b6e3c5b09f90081818f7caa3e436dc312592611724713"
+  url "https://bitbucket.org/pypy/pypy/downloads/pypy3.6-v7.1.1-src.tar.bz2"
+  sha256 "6a3ef876e3691a54f4cff045028ec3be94ab9beb2e99f051b83175302c1899a8"
 
   bottle do
     cellar :any
-    sha256 "51fde2ccad56f8136201c2d49ae6f3f9258f138637e388c8bb5d7d2617ef01c3" => :high_sierra
-    sha256 "c337c4f6ecae8ecced8fb7fb901bb174a4913d54044af2ddab2b634a76718b4b" => :sierra
-    sha256 "1c13a907bd266e44d17dc6c5c39d59f4cf88e7ad89a67ad8b300a25481ec7bd0" => :el_capitan
+    sha256 "92de58cd59bee0061cb61c87b09d859df41f6daddf376573dba9f9d12d3ba2f1" => :mojave
+    sha256 "9e366afcc36b9c8f5523ff1a57c349dff7827dcd43f989ee42a2b0559e5e9197" => :high_sierra
+    sha256 "47236bd7a55b497bd75f183e59402802223b06f19fef7e246c3663461f072af0" => :sierra
   end
 
-  option "without-bootstrap", "Translate Pypy with system Python instead of " \
-                              "downloading a Pypy binary distribution to " \
-                              "perform the translation (adds 30-60 minutes " \
-                              "to build)"
-
-  depends_on :arch => :x86_64
   depends_on "pkg-config" => :build
-  depends_on "gdbm" => :recommended
-  depends_on "sqlite" => :recommended
+  depends_on "pypy" => :build
+  depends_on :arch => :x86_64
+  depends_on "gdbm"
+  # pypy does not find system libffi, and its location cannot be given
+  # as a build option
+  depends_on "libffi" if DevelopmentTools.clang_build_version >= 1000
   depends_on "openssl"
-  depends_on "xz" => :recommended
-
-  resource "bootstrap" do
-    url "https://bitbucket.org/pypy/pypy/downloads/pypy2-v5.9.0-osx64.tar.bz2"
-    sha256 "94de50ed80c7f6392ed356c03fd54cdc84858df43ad21e9e971d1b6da0f6b867"
-  end
+  depends_on "sqlite"
+  depends_on "xz"
 
   # packaging depends on pyparsing
   resource "pyparsing" do
-    url "https://files.pythonhosted.org/packages/3c/ec/a94f8cf7274ea60b5413df054f82a8980523efd712ec55a59e7c3357cf7c/pyparsing-2.2.0.tar.gz"
-    sha256 "0832bcf47acd283788593e7a0f542407bd9550a55a8a8435214a1960e04bcb04"
+    url "https://files.pythonhosted.org/packages/5d/3a/24d275393f493004aeb15a1beae2b4a3043526e8b692b65b4a9341450ebe/pyparsing-2.4.0.tar.gz"
+    sha256 "1873c03321fc118f4e9746baf201ff990ceb915f433f23b395f5580d1840cb2a"
   end
 
   # packaging and setuptools depend on six
   resource "six" do
-    url "https://files.pythonhosted.org/packages/16/d8/bc6316cf98419719bd59c91742194c111b6f2e85abac88e496adefaf7afe/six-1.11.0.tar.gz"
-    sha256 "70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9"
+    url "https://files.pythonhosted.org/packages/dd/bf/4138e7bfb757de47d1f4b6994648ec67a51efe58fa907c1e11e350cddfca/six-1.12.0.tar.gz"
+    sha256 "d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"
   end
 
   # setuptools depends on packaging
   resource "packaging" do
-    url "https://files.pythonhosted.org/packages/c6/70/bb32913de251017e266c5114d0a645f262fb10ebc9bf6de894966d124e35/packaging-16.8.tar.gz"
-    sha256 "5d50835fdf0a7edf0b55e311b7c887786504efea1177abd7e69329a8e5ea619e"
+    url "https://files.pythonhosted.org/packages/16/51/d72654dbbaa4a4ffbf7cb0ecd7d12222979e0a660bf3f42acc47550bf098/packaging-19.0.tar.gz"
+    sha256 "0c98a5d0be38ed775798ece1b9727178c4469d9c3b4ada66e8e6b7849f8732af"
   end
 
   # setuptools depends on appdirs
@@ -53,27 +47,31 @@ class Pypy3 < Formula
   end
 
   resource "setuptools" do
-    url "https://files.pythonhosted.org/packages/a4/c8/9a7a47f683d54d83f648d37c3e180317f80dc126a304c45dc6663246233a/setuptools-36.5.0.zip"
-    sha256 "ce2007c1cea3359870b80657d634253a0765b0c7dc5a988d77ba803fc86f2c64"
+    url "https://files.pythonhosted.org/packages/1d/64/a18a487b4391a05b9c7f938b94a16d80305bf0369c6b0b9509e86165e1d3/setuptools-41.0.1.zip"
+    sha256 "a222d126f5471598053c9a77f4b5d4f26eaa1f150ad6e01dcf1a42e185d05613"
   end
 
   resource "pip" do
-    url "https://files.pythonhosted.org/packages/11/b6/abcb525026a4be042b486df43905d6893fb04f05aac21c32c638e939e447/pip-9.0.1.tar.gz"
-    sha256 "09f243e1a7b461f654c26a725fa373211bb7ff17a9300058b205c61658ca940d"
+    url "https://files.pythonhosted.org/packages/93/ab/f86b61bef7ab14909bd7ec3cd2178feb0a1c86d451bc9bccd5a1aedcde5f/pip-19.1.1.tar.gz"
+    sha256 "44d3d7d3d30a1eb65c7e5ff1173cdf8f7467850605ac7cc3707b6064bddd0958"
   end
-
-  resource "pycparser" do
-    url "https://files.pythonhosted.org/packages/8c/2d/aad7f16146f4197a11f8e91fb81df177adcc2073d36a17b1491fd09df6ed/pycparser-2.18.tar.gz"
-    sha256 "99a8ca03e29851d96616ad0404b4aad7d9ee16f25c9f9708a11faf2810f7b226"
-  end
-
-  # https://bugs.launchpad.net/ubuntu/+source/gcc-4.2/+bug/187391
-  fails_with :gcc
 
   def install
+    ENV.append "CFLAGS", "-I#{MacOS.sdk_path}/System/Library/Frameworks/Tk.framework/Versions/8.5/Headers"
+
     # Work around "dyld: Symbol not found: _utimensat"
-    if MacOS.version == :sierra && MacOS::Xcode.installed? && MacOS::Xcode.version >= "9.0"
+    if MacOS.version == :sierra && MacOS::Xcode.version >= "9.0"
       ENV.delete("SDKROOT")
+    end
+
+    # This has been completely rewritten upstream in master so check with
+    # the next release whether this can be removed or not.
+    inreplace "pypy/tool/build_cffi_imports.py" do |s|
+      s.gsub! "http://", "https://"
+      s.gsub! "https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-2.6.2.tar.gz",
+              "https://mirrorservice.org/pub/OpenBSD/LibreSSL/libressl-2.6.2.tar.gz"
+      s.gsub! "os.path.join(tempfile.gettempdir(), 'pypy-archives')",
+              "os.path.join('#{buildpath}', 'pypy-archives')"
     end
 
     # Having PYTHONPATH set can cause the build to fail if another
@@ -82,20 +80,7 @@ class Pypy3 < Formula
     ENV["PYTHONPATH"] = ""
     ENV["PYPY_USESSION_DIR"] = buildpath
 
-    python = "python"
-    if build.with?("bootstrap") && MacOS.prefer_64_bit?
-      resource("bootstrap").stage buildpath/"bootstrap"
-      python = buildpath/"bootstrap/bin/pypy"
-    end
-
-    # PyPy 5.7.1 needs either cffi or pycparser to build
-    if build.without?("bootstrap")
-      %w[pycparser].each do |pkg|
-        resource(pkg).stage buildpath/"pycparser"
-        ENV.append "PYTHONPATH", buildpath/"pycparser"
-      end
-    end
-
+    python = Formula["pypy"].opt_bin/"pypy"
     cd "pypy/goal" do
       system python, buildpath/"rpython/bin/rpython",
              "-Ojit", "--shared", "--cc", ENV.cc, "--verbose",
@@ -104,11 +89,8 @@ class Pypy3 < Formula
 
     libexec.mkpath
     cd "pypy/tool/release" do
-      package_args = %w[--archive-name pypy3 --targetdir .]
-      package_args << "--without-gdbm" if build.without? "gdbm"
-      package_args << "--without-lzma" if build.without? "xz"
-      system python, "package.py", *package_args
-      system "tar", "-C", libexec.to_s, "--strip-components", "1", "-xzf", "pypy3.tar.bz2"
+      system python, "package.py", "--archive-name", "pypy3", "--targetdir", "."
+      system "tar", "-C", libexec.to_s, "--strip-components", "1", "-xf", "pypy3.tar.bz2"
     end
 
     (libexec/"lib").install libexec/"bin/libpypy3-c.dylib" => "libpypy3-c.dylib"
@@ -127,7 +109,7 @@ class Pypy3 < Formula
     # we want to avoid putting PyPy's Python.h somewhere that configure
     # scripts will find it.
     bin.install_symlink libexec/"bin/pypy3"
-    bin.install_symlink libexec/"bin/pypy3.5"
+    bin.install_symlink libexec/"bin/pypy" => "pypy3.6"
     lib.install_symlink libexec/"lib/libpypy3-c.dylib"
   end
 
@@ -155,7 +137,7 @@ class Pypy3 < Formula
       install-scripts=#{scripts_folder}
     EOS
 
-    %w[appdirs pyparsing six packaging setuptools pip].each do |pkg|
+    %w[appdirs six packaging setuptools pyparsing pip].each do |pkg|
       resource(pkg).stage do
         system bin/"pypy3", "-s", "setup.py", "install", "--force", "--verbose"
       end
@@ -186,7 +168,7 @@ class Pypy3 < Formula
         pip_pypy3 install --upgrade pip setuptools
 
     See: https://docs.brew.sh/Homebrew-and-Python
-    EOS
+  EOS
   end
 
   # The HOMEBREW_PREFIX location of site-packages

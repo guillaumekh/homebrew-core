@@ -1,14 +1,14 @@
 class Nss < Formula
   desc "Libraries for security-enabled client and server applications"
   homepage "https://developer.mozilla.org/docs/NSS"
-  url "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_35_RTM/src/nss-3.35.tar.gz"
-  sha256 "f4127de09bede39f5fd0f789d33c3504c5d261e69ea03022d46b319b3e32f6fa"
+  url "https://ftp.mozilla.org/pub/security/nss/releases/NSS_3_46_RTM/src/nss-3.46.tar.gz"
+  sha256 "6b699649d285602ba258a4b0957cb841eafc94eff5735a9da8da0adbb9a10cef"
 
   bottle do
     cellar :any
-    sha256 "78743b2395b18d5224edd8436e4ca0414ba277885493cfc7d0cd64c09b6e82a6" => :high_sierra
-    sha256 "2e3bb9ce22484d0f3f50198464ab8f67e305c0b11656c88a7bd16eab00367ffb" => :sierra
-    sha256 "851fa4c8c061df509c8ee1129d80887cce8a954927030510ea86ffeac7f0f0a2" => :el_capitan
+    sha256 "337d701f18f0493ee3f3b5ddb53a041438ea1429747e7ef3604f6b19d90dee33" => :mojave
+    sha256 "f1d570fd77ab0f27b255e43cb75c7907de8d1f103ef6b78bdc609f7f9d027eb4" => :high_sierra
+    sha256 "0bb073e2c3ef371bf83e8a1f3ca12b1e67676e25701fd0eb3fad147200c46377" => :sierra
   end
 
   keg_only <<~EOS
@@ -26,11 +26,12 @@ class Nss < Formula
 
     args = %W[
       BUILD_OPT=1
+      NSS_ALLOW_SSLKEYLOGFILE=1
       NSS_USE_SYSTEM_SQLITE=1
       NSPR_INCLUDE_DIR=#{Formula["nspr"].opt_include}/nspr
       NSPR_LIB_DIR=#{Formula["nspr"].opt_lib}
+      USE_64=1
     ]
-    args << "USE_64=1" if MacOS.prefer_64_bit?
 
     # Remove the broken (for anyone but Firefox) install_name
     inreplace "coreconf/Darwin.mk", "-install_name @executable_path", "-install_name #{lib}"
@@ -85,7 +86,7 @@ class Nss < Formula
       *) exit 1;;
     esac
     pkg-config "$opt" nss
-    EOS
+  EOS
   end
 
   def pc_file; <<~EOS
@@ -100,6 +101,6 @@ class Nss < Formula
     Requires: nspr >= 4.12
     Libs: -L${libdir} -lnss3 -lnssutil3 -lsmime3 -lssl3
     Cflags: -I${includedir}
-    EOS
+  EOS
   end
 end

@@ -3,14 +3,14 @@ require "language/node"
 class Nativefier < Formula
   desc "Wrap web apps natively"
   homepage "https://github.com/jiahaog/nativefier"
-  url "https://registry.npmjs.org/nativefier/-/nativefier-7.5.4.tgz"
-  sha256 "0ff3abf439ebb339c39b87ff102b394297743c7169ff692eb0a448a46cef0be4"
+  url "https://registry.npmjs.org/nativefier/-/nativefier-7.7.0.tgz"
+  sha256 "e9d4568373a6b1937f9c5fff5a1bbbaa3e4168a408d3644bead65b5974ff99d3"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "1754ef5cffd4abfd37e6207b49cf2146891c363c6c6af88bef1ef7473d0c2c5f" => :high_sierra
-    sha256 "8311b52abae6cde47ff12b19054f018f45fd1efddf2a73dd2531a7ee8b56d5e9" => :sierra
-    sha256 "ec8cbcb077a91bbea28a48547886313ebf0d755de560ca39883764fac1ff0827" => :el_capitan
+    sha256 "93a76e6f1c1f8eb4aac1175662c7ce9e79e9fdea6880fa6444302efff96ffdb2" => :mojave
+    sha256 "ad5a4d0dac69c963bdac1285d5e14849be4d05326e9186ef8a0f5c8c29d6543c" => :high_sierra
+    sha256 "cfc5f8e5a40e478aec70f585d0a1c3edf86be824ed5d9d038d69edfca92acd07" => :sierra
   end
 
   depends_on "node"

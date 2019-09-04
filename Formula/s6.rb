@@ -1,38 +1,23 @@
 class S6 < Formula
   desc "Small & secure supervision software suite"
   homepage "https://skarnet.org/software/s6/"
-
-  stable do
-    url "https://skarnet.org/software/s6/s6-2.7.0.0.tar.gz"
-    sha256 "6617cbf82c73273c67c6102a1a5c48449ef65ffbe8d0db6a587b7f0078dc6e13"
-
-    resource "skalibs" do
-      url "https://skarnet.org/software/skalibs/skalibs-2.6.3.0.tar.gz"
-      sha256 "81d63a1918189036e9cc679d9b327d36a6056bba89132f35bb1c45b50ceb7226"
-    end
-
-    resource "execline" do
-      url "https://skarnet.org/software/execline/execline-2.3.0.4.tar.gz"
-      sha256 "e4bb8fc8f20cca96f4bac9f0f74ebce5081b4b687bb11c79c843faf12507a64b"
-    end
-  end
+  url "https://skarnet.org/software/s6/s6-2.8.0.1.tar.gz"
+  sha256 "dbe08f5b76c15fa32a090779b88fb2de9a9a107c3ac8ce488931dd39aa1c31d8"
 
   bottle do
-    sha256 "d86576c3f1a5de27e7ad20890b4feb37b85c4499f227f2bfafb3f9858ba8af8c" => :high_sierra
-    sha256 "ad3b91fffc60e2bd5f2e7b6bf281fb8500b229594d30b821b7050097abf3d1e0" => :sierra
-    sha256 "4051fe376e02606a46220436a90d20f0fc910556a1bde778bd15d3b23187d3a7" => :el_capitan
+    sha256 "4c1819aca5030161f69a0e8ff7a1c70ca7056e0226b173e3c7098709c2fb03a9" => :mojave
+    sha256 "8600da62dfe7099ba8526addf7dda2a09d9eeb63e7cbe6e5602b1944967b5ea3" => :high_sierra
+    sha256 "a72070b37a6b2d9ae738f32e7970e748c9d354b921718c2ea8d27b6cc5bdb0fc" => :sierra
   end
 
-  head do
-    url "git://git.skarnet.org/s6"
+  resource "skalibs" do
+    url "https://skarnet.org/software/skalibs/skalibs-2.8.1.0.tar.gz"
+    sha256 "431c6507b4a0f539b6463b4381b9b9153c86ad75fa3c6bfc9dc4722f00b166ba"
+  end
 
-    resource "skalibs" do
-      url "git://git.skarnet.org/skalibs"
-    end
-
-    resource "execline" do
-      url "git://git.skarnet.org/execline"
-    end
+  resource "execline" do
+    url "https://skarnet.org/software/execline/execline-2.5.1.0.tar.gz"
+    sha256 "b1a756842947488404db8173bbae179d6e78b6ef551ec683acca540ecaf22677"
   end
 
   def install
@@ -74,18 +59,18 @@ class S6 < Formula
   end
 
   test do
-    # Test execline
-    test_script = testpath/"test.eb"
-    test_script.write <<~EOS
-      import PATH
-      if { [ ! -z ${PATH} ] }
-        true
+    (testpath/"test.eb").write <<~EOS
+      foreground
+      {
+        sleep 1
+      }
+      "echo"
+      "Homebrew"
     EOS
-    system "#{bin}/execlineb", test_script
+    assert_match "Homebrew", shell_output("#{bin}/execlineb test.eb")
 
-    # Test s6
     (testpath/"log").mkpath
-    pipe_output("#{bin}/s6-log #{testpath}/log", "Test input\n")
+    pipe_output("#{bin}/s6-log #{testpath}/log", "Test input\n", 0)
     assert_equal "Test input\n", File.read(testpath/"log/current")
   end
 end

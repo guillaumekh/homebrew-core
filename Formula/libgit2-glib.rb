@@ -1,51 +1,35 @@
 class Libgit2Glib < Formula
   desc "Glib wrapper library around libgit2 git access library"
   homepage "https://github.com/GNOME/libgit2-glib"
-  url "https://download.gnome.org/sources/libgit2-glib/0.26/libgit2-glib-0.26.2.tar.xz"
-  sha256 "2ad6f20db2e38bbfdb6cb452704fe8a911036b86de82dc75bb0f3b20db40ce9c"
-  revision 1
+  url "https://download.gnome.org/sources/libgit2-glib/0.28/libgit2-glib-0.28.0.1.tar.xz"
+  sha256 "e70118481241a841d5261bdd4caa3158b2ffcb5ccf9d4f32b6cf6563b83a0f28"
+  head "https://github.com/GNOME/libgit2-glib.git"
 
   bottle do
-    sha256 "3f54034bdc3f924e2755c7b70237bcca02d4360d40dd078f515636f5d76ad37a" => :high_sierra
-    sha256 "24e9475134d69efaa3b4da3e993040af6c31ac790167d779c3b8700009f021c6" => :sierra
-    sha256 "7d29be8d0f0c8275a0d5d7a2cbb7bb68375f4476b2a1776f6e05f0902db10f04" => :el_capitan
+    sha256 "f82b96ed9c95745467ee9aff18b2d6ba0156d51f68801a781bee67d6b2b2923a" => :mojave
+    sha256 "0b66cc16cda70882208b1f82be0a715fb3994054ea336c847e78189eb09dee97" => :high_sierra
+    sha256 "e05260bd33fb4ff96ba9669ab65930bef977219bc455717ca6bdd97eb77e3bd6" => :sierra
   end
-
-  head do
-    url "https://github.com/GNOME/libgit2-glib.git"
-
-    depends_on "libtool" => :build
-    depends_on "automake" => :build
-    depends_on "autoconf" => :build
-    depends_on "gnome-common" => :build
-    depends_on "gtk-doc" => :build
-  end
-
-  deprecated_option "with-python" => "with-python@2"
 
   depends_on "gobject-introspection" => :build
+  depends_on "meson" => :build
+  depends_on "ninja" => :build
   depends_on "pkg-config" => :build
+  depends_on "vala" => :build
   depends_on "gettext"
-  depends_on "libgit2"
   depends_on "glib"
-  depends_on "vala" => :optional
-  depends_on "python@2" => :optional
+  depends_on "libgit2"
 
   def install
-    args = %W[
-      --prefix=#{prefix}
-      --disable-silent-rules
-      --disable-dependency-tracking
-    ]
-
-    args << "--enable-python=no" if build.without? "python@2"
-    args << "--enable-vala=no" if build.without? "vala"
-
-    system "./autogen.sh", *args if build.head?
-    system "./configure", *args if build.stable?
-    system "make", "install"
-
-    libexec.install "examples/.libs", "examples/clone", "examples/general", "examples/walk"
+    mkdir "build" do
+      system "meson", "--prefix=#{prefix}",
+                      "-Dpython=false",
+                      "-Dvapi=true",
+                      ".."
+      system "ninja", "-v"
+      system "ninja", "install", "-v"
+      libexec.install Dir["examples/*"]
+    end
   end
 
   test do

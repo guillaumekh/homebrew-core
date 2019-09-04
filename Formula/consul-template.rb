@@ -2,24 +2,25 @@ class ConsulTemplate < Formula
   desc "Generic template rendering and notifications with Consul"
   homepage "https://github.com/hashicorp/consul-template"
   url "https://github.com/hashicorp/consul-template.git",
-      :tag => "v0.19.4",
-      :revision => "111a80441153783544817b7c6a9c08633308b9a8"
+      :tag      => "v0.21.0",
+      :revision => "05c6b650cd48d79d5aae4a603ae24c24ff61098c"
   head "https://github.com/hashicorp/consul-template.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "5edefad550b7fa2c86b7d0484cae79b3b49b7b89c402f38f2b341ea948150410" => :high_sierra
-    sha256 "55b7eb1dd13f7fb4a4285a14e3effe27a33667352aee2b3dd1f87dd91b037e7a" => :sierra
-    sha256 "0ba3259f899d530ec583de3a10a421fefce9641dc118f59b2c89354ad1cd56bc" => :el_capitan
+    sha256 "e2386b57528d2c4b8271be7631c92627e1f6ed962f651cc9a8dacd465a2321d7" => :mojave
+    sha256 "03ceedf8981565c29f1309f32ec160b811c58f350496e9bc4b0dc3d67bc2ab87" => :high_sierra
+    sha256 "8b79694dda58040c7e9f6ce200247fa6a57553f08f2bfd610ecaf4c821c3b657" => :sierra
   end
 
   depends_on "go" => :build
 
   def install
+    ENV["GO111MODULE"] = "on"
     ENV["GOPATH"] = buildpath
-    arch = MacOS.prefer_64_bit? ? "amd64" : "386"
     ENV["XC_OS"] = "darwin"
-    ENV["XC_ARCH"] = arch
+    ENV["XC_ARCH"] = "amd64"
+
     dir = buildpath/"src/github.com/hashicorp/consul-template"
     dir.install buildpath.children - [buildpath/".brew_home"]
 

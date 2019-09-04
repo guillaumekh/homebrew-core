@@ -3,22 +3,22 @@ require "language/node"
 class Chronograf < Formula
   desc "Open source monitoring and visualization UI for the TICK stack"
   homepage "https://docs.influxdata.com/chronograf/latest/"
-  url "https://github.com/influxdata/chronograf/archive/1.4.3.0.tar.gz"
-  sha256 "652621446faf9e2202034b4e367b68afb8d06443bf2e574e08357fc87143c71f"
+  url "https://github.com/influxdata/chronograf/archive/1.7.14.tar.gz"
+  sha256 "245479b691e2ad484717778562ce9e0c21b1d769e7d748335d1c5f41cd677d4c"
   head "https://github.com/influxdata/chronograf.git"
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "208aa4c3a84fd771c1353dc11f3d8e020e1699479667652994a25575ddf34479" => :high_sierra
-    sha256 "371c0e911a4715fa69a72409feb761df976e91a73c9d24c705585bb212c0aca8" => :sierra
-    sha256 "bd51bd6ebba084008c936fcea8c899be75427276c09ddbbab73d473d50110f64" => :el_capitan
+    sha256 "f3115535c7d986495c81b71b9b0f0e718d9cc4319fb6ed6d3fe38f559f820768" => :mojave
+    sha256 "a5c6e5b3dcfd0896e51b2c80606ea0127079cf0f1f42385d6bff4dcf5496019c" => :high_sierra
+    sha256 "4e54046b3218fac9e81fa7b28b621e83ccec7e025e9a546f2686e62fc1c19478" => :sierra
   end
 
   depends_on "go" => :build
   depends_on "node" => :build
   depends_on "yarn" => :build
-  depends_on "influxdb" => :recommended
-  depends_on "kapacitor" => :recommended
+  depends_on "influxdb"
+  depends_on "kapacitor"
 
   def install
     ENV["GOPATH"] = buildpath
@@ -28,6 +28,9 @@ class Chronograf < Formula
     chronograf_path.install buildpath.children
 
     cd chronograf_path do
+      cd "ui" do # fix node 12 compatibility
+        system "yarn", "upgrade", "parcel@1.11.0", "node-sass@4.12.0"
+      end
       system "make", "dep"
       system "make", ".jssrc"
       system "make", "chronograf"
@@ -64,7 +67,7 @@ class Chronograf < Formula
         <string>#{var}/log/chronograf.log</string>
       </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do
@@ -72,7 +75,7 @@ class Chronograf < Formula
       pid = fork do
         exec "#{bin}/chronograf"
       end
-      sleep 1
+      sleep 3
       output = shell_output("curl -s 0.0.0.0:8888/chronograf/v1/")
       sleep 1
       assert_match %r{/chronograf/v1/layouts}, output

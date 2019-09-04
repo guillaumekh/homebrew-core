@@ -1,38 +1,39 @@
 class RomTools < Formula
   desc "Tools for Multiple Arcade Machine Emulator"
-  homepage "http://mamedev.org/"
-  url "https://github.com/mamedev/mame/archive/mame0196.tar.gz"
-  version "0.196"
-  sha256 "fc4436a23d7f2ef0b3c3f600c00745bc468541d0d29bcd3a1e0c599c5c02df7f"
+  homepage "https://mamedev.org/"
+  url "https://github.com/mamedev/mame/archive/mame0212.tar.gz"
+  version "0.212"
+  sha256 "3d3599c49626b240e98b1433c0813e11e471846154e8d29261d345cc78fc9a21"
   head "https://github.com/mamedev/mame.git"
 
   bottle do
     cellar :any
-    sha256 "0f86f1fb870123fddddd6c62ec70bc89a6dd77ccdfd4219ad67cf28807c58f1d" => :high_sierra
-    sha256 "7de7b5c5f0cda98735c812bc5c3c7c056a493d0be6730394c5e6000a421d40b4" => :sierra
-    sha256 "ad45f0bbeccd9938e1af5ed8e83f0c580a7198f76efc51aad9719874ad93ab6f" => :el_capitan
+    sha256 "647246a3854c8cfbd22c9a3cc6c4fd7bd74cdc1a721da42a1f41c92e1bec99e9" => :mojave
+    sha256 "3d4c79ef55a38da9423340f3b982d4cd9d787547d5cc6778843b703fcb8b2885" => :high_sierra
   end
 
-  depends_on "python@2" => :build if MacOS.version <= :snow_leopard
+  depends_on "asio" => :build
   depends_on "pkg-config" => :build
-  depends_on "sdl2"
   depends_on "flac"
-  depends_on "portmidi"
+  # Need C++ compiler and standard library support C++14.
+  # Build failure on Sierra, see:
+  # https://github.com/Homebrew/homebrew-core/pull/39388
+  depends_on :macos => :high_sierra
+  depends_on "sdl2"
   depends_on "utf8proc"
 
   def install
     inreplace "scripts/src/osd/sdl.lua", "--static", ""
     system "make", "TOOLS=1",
-                   "PTR64=#{MacOS.prefer_64_bit? ? 1 : 0}", # for old Macs
                    "USE_LIBSDL=1",
                    "USE_SYSTEM_LIB_EXPAT=1",
                    "USE_SYSTEM_LIB_ZLIB=1",
+                   "USE_SYSTEM_LIB_ASIO=1",
                    "USE_SYSTEM_LIB_FLAC=1",
-                   "USE_SYSTEM_LIB_PORTMIDI=1",
                    "USE_SYSTEM_LIB_UTF8PROC=1"
     bin.install %w[
-      aueffectutil castool chdman floptool imgtool jedutil ldresample
-      ldverify nltool nlwav pngcmp regrep romcmp src2html srcclean unidasm
+      aueffectutil castool chdman floptool imgtool jedutil ldresample ldverify
+      nltool nlwav pngcmp regrep romcmp src2html srcclean testkeys unidasm
     ]
     bin.install "split" => "rom-split"
     man1.install Dir["docs/man/*.1"]

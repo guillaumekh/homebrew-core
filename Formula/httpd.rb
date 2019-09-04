@@ -1,13 +1,13 @@
 class Httpd < Formula
   desc "Apache HTTP server"
   homepage "https://httpd.apache.org/"
-  url "https://www.apache.org/dyn/closer.cgi?path=httpd/httpd-2.4.33.tar.bz2"
-  sha256 "de02511859b00d17845b9abdd1f975d5ccb5d0b280c567da5bf2ad4b70846f05"
+  url "https://www.apache.org/dyn/closer.cgi?path=/httpd/httpd-2.4.41.tar.bz2"
+  sha256 "133d48298fe5315ae9366a0ec66282fa4040efa5d566174481077ade7d18ea40"
 
   bottle do
-    sha256 "12d16378423a5fca0b8c66ba279722cbaa18474d90d150373fae6e75e4b1d304" => :high_sierra
-    sha256 "06954b169feaa6aa64e92a3c3e3224594fe3c62f1797b6da9bdbef1458ae4b96" => :sierra
-    sha256 "4366077aded14e42705c50fd4d0c859641db3b2fdc9d5f027a79c3a82886db7b" => :el_capitan
+    sha256 "69fa9c4f5ac1da302f5784353ca75fe9d20d09d62308f9dd12565c427c5bb7e1" => :mojave
+    sha256 "9c9816bc486b000a783c1dfc09a512828017b659a211bd0db646f47be5c5db26" => :high_sierra
+    sha256 "ba090084dbd0d52085e95af10b1b8fe0b492ab41d4589104bcae5b10fd6d4381" => :sierra
   end
 
   depends_on "apr"
@@ -16,6 +16,7 @@ class Httpd < Formula
   depends_on "nghttp2"
   depends_on "openssl"
   depends_on "pcre"
+  uses_from_macos "zlib"
 
   def install
     # fixup prefix references in favour of opt_prefix references
@@ -58,10 +59,15 @@ class Httpd < Formula
                           "--with-apr=#{Formula["apr"].opt_prefix}",
                           "--with-apr-util=#{Formula["apr-util"].opt_prefix}",
                           "--with-brotli=#{Formula["brotli"].opt_prefix}",
+                          "--with-libxml2=#{MacOS.sdk_path_if_needed}/usr",
                           "--with-mpm=prefork",
                           "--with-nghttp2=#{Formula["nghttp2"].opt_prefix}",
                           "--with-ssl=#{Formula["openssl"].opt_prefix}",
-                          "--with-pcre=#{Formula["pcre"].opt_prefix}"
+                          "--with-pcre=#{Formula["pcre"].opt_prefix}",
+                          "--with-z=#{MacOS.sdk_path_if_needed}/usr",
+                          "--disable-lua",
+                          "--disable-luajit"
+    system "make"
     system "make", "install"
 
     # suexec does not install without root
@@ -98,6 +104,11 @@ class Httpd < Formula
     end
   end
 
+  def post_install
+    (var/"cache/httpd").mkpath
+    (var/"www").mkpath
+  end
+
   def caveats
     <<~EOS
       DocumentRoot is #{var}/www.
@@ -105,11 +116,6 @@ class Httpd < Formula
       The default ports have been set in #{etc}/httpd/httpd.conf to 8080 and in
       #{etc}/httpd/extra/httpd-ssl.conf to 8443 so that httpd can run without sudo.
     EOS
-  end
-
-  def post_install
-    (var/"cache/httpd").mkpath
-    (var/"www").mkpath
   end
 
   plist_options :manual => "apachectl start"
@@ -131,10 +137,15 @@ class Httpd < Formula
       <true/>
     </dict>
     </plist>
-    EOS
+  EOS
   end
 
   test do
+    # Ensure modules depending on zlib and xml2 have been compiled
+    assert_predicate lib/"httpd/modules/mod_deflate.so", :exist?
+    assert_predicate lib/"httpd/modules/mod_proxy_html.so", :exist?
+    assert_predicate lib/"httpd/modules/mod_xml2enc.so", :exist?
+
     begin
       require "socket"
 

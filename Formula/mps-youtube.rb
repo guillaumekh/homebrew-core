@@ -5,18 +5,18 @@ class MpsYoutube < Formula
   homepage "https://github.com/mps-youtube/mps-youtube"
   url "https://github.com/mps-youtube/mps-youtube/archive/v0.2.8.tar.gz"
   sha256 "d5f2c4bc1f57f0566242c4a0a721a5ceaa6d6d407f9d6dd29009a714a0abec74"
-  revision 2
+  revision 8
 
   bottle do
     cellar :any_skip_relocation
-    sha256 "ab6681b670d22786428e8f9dfa09632142baecefb8686618413a9513f621e197" => :high_sierra
-    sha256 "58b9d587e13c799790bbd1c627ba38fb6a8ced8f1be41fe53f8abd38e29d7390" => :sierra
-    sha256 "79f16dfac8ff506692b627224b9a2f159e51027aa0c08bc7b02c9f56cbbac67d" => :el_capitan
+    rebuild 2
+    sha256 "95a20b9908255c78a3020339a93c99b3cbd0439ab07be12f26cd7e175d09ba73" => :mojave
+    sha256 "03bb33b5d74a5ca53ce0452ce240cdc4421250ca1ead5bc68d3de55f1f971299" => :high_sierra
+    sha256 "005b035e7ff507b035febadd63ebc5168aacafd5a2d165e2263dff246f2cdb3f" => :sierra
   end
 
+  depends_on "mpv"
   depends_on "python"
-  depends_on "mpv" => :recommended
-  depends_on "mplayer" => :optional
 
   resource "pafy" do
     url "https://files.pythonhosted.org/packages/41/cb/ec840c79942fb0788982963b61a361ecd10e4e58ad3dcaef4f0e809ce2fe/pafy-0.5.4.tar.gz"
@@ -24,14 +24,14 @@ class MpsYoutube < Formula
   end
 
   resource "youtube_dl" do
-    url "https://files.pythonhosted.org/packages/bb/6c/d7af4a0008fee9c9eccd2dc7d4b6dba008f2b31c19c7003f5af98560188e/youtube_dl-2018.2.11.tar.gz"
-    sha256 "80da352d7da4cff7e591a8ab70262fceceaf561b86ec72c0dc86891b31e07090"
+    url "https://files.pythonhosted.org/packages/25/fa/92097e9d95470ac12211b6f63744d159f473952ad01e9dd869edc62fb42d/youtube_dl-2019.7.30.tar.gz"
+    sha256 "41ee1e4247ed3810d9730c54b25ebe4ca19c1ca7373e3de05a3dc8e8884ca475"
   end
 
   def install
     venv = virtualenv_create(libexec, "python3")
 
-    ["youtube_dl", "pafy"].each do |r|
+    %w[youtube_dl pafy].each do |r|
       venv.pip_install resource(r)
     end
 
@@ -39,7 +39,7 @@ class MpsYoutube < Formula
   end
 
   test do
-    Open3.popen3("#{bin}/mpsyt", "/september,", "da 1,", "q") do |_, _, stderr|
+    Open3.popen3("#{bin}/mpsyt", "/Drop4Drop x Ed Sheeran,", "da 1,", "q") do |_, _, stderr|
       assert_empty stderr.read, "Some warnings were raised"
     end
   end

@@ -1,8 +1,8 @@
 class Elasticsearch < Formula
   desc "Distributed search & analytics engine"
   homepage "https://www.elastic.co/products/elasticsearch"
-  url "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.3.tar.gz"
-  sha256 "01dd8dec5f0acf04336721e404bf4d075675a3acae9f2a9fdcdbb5ca11baca76"
+  url "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-6.8.2.tar.gz"
+  sha256 "34aaf5b67b4dfefdd31d251b63006dda8e8a43b12313f33e1d78a91221ac9ca0"
 
   head do
     url "https://github.com/elasticsearch/elasticsearch.git"
@@ -61,16 +61,18 @@ class Elasticsearch < Formula
 
   def post_install
     # Make sure runtime directories exist
-    (var/"lib/elasticsearch/#{cluster_name}").mkpath
+    (var/"lib/elasticsearch").mkpath
     (var/"log/elasticsearch").mkpath
-    ln_s etc/"elasticsearch", libexec/"config"
+    ln_s etc/"elasticsearch", libexec/"config" unless (libexec/"config").exist?
     (var/"elasticsearch/plugins").mkpath
-    ln_s var/"elasticsearch/plugins", libexec/"plugins"
+    ln_s var/"elasticsearch/plugins", libexec/"plugins" unless (libexec/"plugins").exist?
+    # fix test not being able to create keystore because of sandbox permissions
+    system bin/"elasticsearch-keystore", "create" unless (etc/"elasticsearch/elasticsearch.keystore").exist?
   end
 
   def caveats
     s = <<~EOS
-      Data:    #{var}/lib/elasticsearch/#{cluster_name}/
+      Data:    #{var}/lib/elasticsearch/
       Logs:    #{var}/log/elasticsearch/#{cluster_name}.log
       Plugins: #{var}/elasticsearch/plugins/
       Config:  #{etc}/elasticsearch/
@@ -112,6 +114,7 @@ class Elasticsearch < Formula
   end
 
   test do
+    assert_includes(stable.url, "-oss-")
     require "socket"
 
     server = TCPServer.new(0)
